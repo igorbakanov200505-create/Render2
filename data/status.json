@@ -1,10 +1,22 @@
 {
   "schema_version": 1,
-  "checked_at": null,
-  "status": "unknown",
-  "http_status": null,
-  "duration_ms": null,
-  "error": "Первая проверка GitHub Actions ещё не выполнена",
-  "counts": {"total": 0, "success": 0, "error": 0},
-  "history": []
+  "checked_at": "2026-11-08T19:28:55Z",
+  "status": "up",
+  "http_status": 200,
+  "duration_ms": 266,
+  "error": null,
+  "counts": {
+    "total": 1,
+    "success": 1,
+    "error": 0
+  },
+  "history": [
+    {
+      "checked_at": "2026-11-08T19:28:55Z",
+      "status": "up",
+      "http_status": 200,
+      "duration_ms": 266,
+      "error": null
+    }
+  ]
 }
