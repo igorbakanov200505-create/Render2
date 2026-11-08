@@ -1,0 +1,10 @@
+{
+  "schema_version": 1,
+  "checked_at": null,
+  "status": "unknown",
+  "http_status": null,
+  "duration_ms": null,
+  "error": "Первая проверка GitHub Actions ещё не выполнена",
+  "counts": {"total": 0, "success": 0, "error": 0},
+  "history": []
+}
