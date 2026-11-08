@@ -1,0 +1,72 @@
+name: ÜiirmeHub Pulse • HTTP check and deploy
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'index.html'
+      - '.github/workflows/monitor.yml'
+      - 'monitor/**'
+      - 'data/**'
+  schedule:
+    # GitHub Actions allows scheduled runs at least every 5 min (not 30 sec).
+    # Offset avoids the busiest minute at the top of the hour.
+    - cron: '3-58/5 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pulse-site
+  cancel-in-progress: false
+
+jobs:
+  check-and-publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+
+      - name: Verify Render and update public status
+        run: python3 monitor/check.py
+
+      - name: Save status in GitHub repository
+        env:
+          REPO_BRANCH: ${{ github.event.repository.default_branch }}
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add data/status.json
+          if ! git diff --cached --quiet; then
+            git commit -m "pulse: record latest public HTTP check [skip ci]"
+            git push origin "HEAD:${REPO_BRANCH}"
+          fi
+
+      - name: Prepare minimal public website
+        run: |
+          mkdir -p .site/data
+          cp index.html .site/index.html
+          cp data/status.json .site/data/status.json
+          cp monitor/config.json .site/config.json
+          touch .site/.nojekyll
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: .site
+
+      - name: Publish Pages (including latest status)
+        id: deployment
+        uses: actions/deploy-pages@v4
