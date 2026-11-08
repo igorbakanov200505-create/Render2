@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#0b1020">
+  <meta name="description" content="ÜiirmeHub Monitor — отправка запросов на Render каждые 30 секунд, пока страница открыта.">
+  <title>ÜiirmeHub • Render Monitor</title>
+  <style>
+    :root { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #f0f4ff; background:#0b1020; }
+    * { box-sizing:border-box; }
+    body { margin:0; min-height:100vh; background:radial-gradient(circle at 85% 10%, #24245c77, transparent 34%), radial-gradient(circle at 0 75%, #0e536044, transparent 40%), #0b1020; }
+    .page { width:min(1020px, calc(100% - 32px)); margin:0 auto; padding:36px 0 50px; }
+    header { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:42px; }
+    .brand {display:flex;align-items:center;gap:13px;font-size:18px;font-weight:760;letter-spacing:.2px}
+    .logo { width:42px; height:42px; display:grid; place-items:center; border-radius:14px; background:linear-gradient(145deg,#7c7cf4,#3ed6cd); font-size:22px; color:#060d1d; box-shadow:0 7px 28px #42d9d944 }
+    .tag {border:1px solid #ffffff26; color:#adbad3; background:#ffffff08; padding:7px 12px;border-radius:30px;font-size:12px;white-space:nowrap}
+    h1 { margin:0; font-size:clamp(32px,5vw,51px); line-height:1.09; letter-spacing:-1.7px; }
+    .accent { color:#99a1ff; }
+    .intro { color:#aeb9d2; font-size:15px; line-height:1.7; max-width:700px; margin:15px 0 28px; }
+    .panel { border:1px solid #ffffff1b; background:#151b2ddc; border-radius:22px; box-shadow:0 22px 65px #00000022; }
+    .main-panel { padding:28px; }
+    .status-row {display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+    .status-label {font-size:13px;color:#9eabc3;font-weight:620;text-transform:uppercase;letter-spacing:1px}
+    .status {display:flex;align-items:center;gap:10px; margin-top:12px; font-size:25px;font-weight:730;}
+    .dot { height:12px;width:12px;border-radius:50%;background:#f9b857;box-shadow:0 0 0 5px #f9b85722;flex-shrink:0 }
+    .dot.active {background:#50d1a6; box-shadow:0 0 0 5px #50d1a622}
+    .dot.error {background:#ff7181; box-shadow:0 0 0 5px #ff718122}
+    .clock { border-radius:13px; background:#0d1425; border:1px solid #ffffff12; padding:11px 15px; min-width:138px;text-align:center; }
+    .clock small { display:block;color:#91a1bf;font-size:12px;margin-bottom:4px}
+    .clock strong {font-size:23px;font-variant-numeric:tabular-nums}
+    .progress {height:7px;border-radius:20px;background:#293348;margin:25px 0 18px;overflow:hidden}
+    .progress-fill {height:100%;width:0%;background:linear-gradient(90deg,#5a88ed,#49d1be);border-radius:20px;transition:width .4s linear}
+    .stats {display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:16px 0 22px;}
+    .stat {background:#10182a;border:1px solid #ffffff13;border-radius:15px;padding:17px 18px;min-width:0}
+    .stat .stat-name {font-size:12px;color:#9cabc5;margin-bottom:7px}
+    .stat .stat-value {font-size:23px;font-weight:740;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+    .controls {display:flex;flex-wrap:wrap;gap:11px;margin:22px 0 0}
+    button {font:inherit;cursor:pointer;border-radius:12px;min-height:44px;padding:11px 18px;font-weight:700;border:1px solid transparent;transition:transform .2s,background .2s}
+    button:active {transform:translateY(1px)}
+    .primary {background:#7778ed;color:#fff}
+    .primary:hover {background:#8b8cf8}
+    .secondary {background:#ffffff0c;color:#d8e2f4;border-color:#ffffff22}
+    .secondary:hover {background:#ffffff1c}
+    button:disabled {opacity:.45;cursor:not-allowed}
+    .section-heading {font-size:18px;font-weight:730;margin:0 0 18px}
+    .grid {display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,0.95fr);gap:17px;margin-top:17px}
+    .subpanel {padding:23px}
+    label {display:block;color:#a7b7d1;font-size:12px;font-weight:680;margin-bottom:9px}
+    .input-row {display:flex;gap:8px;flex-wrap:wrap}
+    input {min-width:100px;flex:1;padding:12px 12px;border:1px solid #ffffff29;outline:none;color:#fff;border-radius:11px;background:#0c1324;font:inherit;font-size:13px}
+    input:focus-visible {border-color:#8d92fe; box-shadow:0 0 0 3px #8d92fe22}
+    .hint {color:#91a0bc;font-size:12px;line-height:1.6;margin:12px 0 0}
+    .log {list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px;max-height:220px;overflow:auto}
+    .log li {display:flex;gap:11px;align-items:flex-start;color:#bfcbe1;font-size:12px;border-bottom:1px solid #ffffff10;padding-bottom:10px;line-height:1.45}
+    .log time {font-size:11px;color:#7e8fae;white-space:nowrap}
+    .log .info {color:#64d8ba}
+    .log .bad {color:#ff8c98}
+    .warning {border:1px solid #eeae4c55;border-radius:14px;padding:15px 16px;color:#f5dcae;background:#b77b1611;font-size:12px;line-height:1.7;margin-top:18px}
+    .footer {margin-top:25px;color:#8292b1;text-align:center;font-size:12px;line-height:1.7}
+    a {color:#aaaafa;text-decoration:none}
+    a:hover {text-decoration:underline}
+    @media(max-width:700px){.page{padding-top:20px}header{margin-bottom:29px}.main-panel{padding:20px}.stats{grid-template-columns:1fr 1fr}.stats .stat:last-child{grid-column:1/-1}.grid{grid-template-columns:1fr}.subpanel{padding:20px}.status{font-size:21px}.controls button{flex:1}}
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header>
+      <div class="brand"><div class="logo" aria-hidden="true">↗</div><span>ÜiirmeHub <span style="color:#97a9c8;font-weight:400">/ Monitor</span></span></div>
+      <span class="tag">GitHub Pages • HTML</span>
+    </header>
+    <main>
+      <h1>Мониторинг <span class="accent">Render</span></h1>
+      <p class="intro">Эта страница отправляет GET-запрос на твой сервер каждые <strong>30 секунд</strong>. Никакие логины, пароли или данные учеников не передаются.</p>
+      <section class="panel main-panel" aria-labelledby="status-title">
+        <div class="status-row">
+          <div>
+            <div id="status-title" class="status-label">Монитор</div>
+            <div class="status" aria-live="polite"><span id="statusDot" class="dot"></span><span id="statusText">Запуск...</span></div>
+          </div>
+          <div class="clock"><small>Следующий запрос через</small><strong id="countdown">30 с</strong></div>
+        </div>
+        <div class="progress" aria-hidden="true"><div id="progressBar" class="progress-fill"></div></div>
+        <div class="stats">
+          <div class="stat"><div class="stat-name">Всего попыток</div><div id="sentCount" class="stat-value">0</div></div>
+          <div class="stat"><div class="stat-name">Ответ на запрос</div><div id="lastResult" class="stat-value" style="font-size:16px">—</div></div>
+          <div class="stat"><div class="stat-name">Последняя проверка</div><div id="lastTime" class="stat-value" style="font-size:17px">—</div></div>
+        </div>
+        <div class="controls">
+          <button id="toggleBtn" class="primary" type="button">Остановить монитор</button>
+          <button id="pingBtn" class="secondary" type="button">Отправить запрос сейчас</button>
+        </div>
+      </section>
+      <div class="grid">
+        <section class="panel subpanel">
+          <h2 class="section-heading">Адрес сервера</h2>
+          <form id="urlForm">
+            <label for="renderUrl">HTTPS-адрес Render (или публичного /health)</label>
+            <div class="input-row"><input id="renderUrl" name="renderUrl" type="url" placeholder="https://example.onrender.com/" required autocomplete="url" spellcheck="false"><button class="secondary" type="submit">Сохранить</button></div>
+          </form>
+          <p class="hint">По умолчанию указан адрес Clubium. Если он изменился, вставь новый — настройки сохраняются в этом браузере.</p>
+          <p class="hint" id="validationMessage" role="status"></p>
+        </section>
+        <section class="panel subpanel">
+          <h2 class="section-heading">Журнал запросов</h2>
+          <ul id="eventLog" class="log" aria-live="polite"><li><span>Подготовка к первой проверке...</span></li></ul>
+        </section>
+      </div>
+      <div class="warning"><strong>Важно:</strong> GitHub Pages не запускает JavaScript на сервере. Запросы идут только пока эта страница открыта и браузер не приостановил вкладку. Для настоящей работы 24/7 нужен внешний планировщик или платный Render. Из-за защиты браузера (CORS) страница может подтвердить отправку запроса, но не всегда может определить HTTP-статус Render. И даже регулярные запросы не защищают бесплатный сервер от перезапуска или ограничения по часам.</div>
+    </main>
+    <p class="footer">ÜiirmeHub Server Monitor · Интервал 30 секунд · <a href="https://render.com/docs/free" target="_blank" rel="noopener noreferrer">Ограничения бесплатного Render</a></p>
+  </div>
+  <script>
+    (() => {
+      'use strict';
+      const INTERVAL = 30_000;
+      const REQUEST_TIMEOUT = 20_000;
+      const DEFAULT_URL = 'https://clubium-render.onrender.com/';
+      const $ = (id) => document.getElementById(id);
+      const els = {
+        statusText: $('statusText'), statusDot: $('statusDot'), countdown: $('countdown'),
+        progressBar: $('progressBar'), sentCount: $('sentCount'), lastResult: $('lastResult'),
+        lastTime: $('lastTime'), toggle: $('toggleBtn'), ping: $('pingBtn'),
+        url: $('renderUrl'), form: $('urlForm'), validation: $('validationMessage'), log: $('eventLog')
+      };
+      let url = localStorage.getItem('uiirmehub-monitor-target') || DEFAULT_URL;
+      let attempts = 0;
+      let active = true;
+      let pending = false;
+      let nextTickAt = Date.now() + INTERVAL;
+      let intervalId = null;
+      const timeFormat = new Intl.DateTimeFormat('ru-RU', {hour:'2-digit',minute:'2-digit',second:'2-digit'});
+      els.url.value = url;
+
+      function log(message, error = false) {
+        const li = document.createElement('li');
+        const time = document.createElement('time');
+        time.textContent = timeFormat.format(new Date());
+        const label = document.createElement('span');
+        label.className = error ? 'bad' : 'info';
+        label.textContent = message;
+        li.append(time, label);
+        if (els.log.firstElementChild?.textContent === 'Подготовка к первой проверке...') els.log.replaceChildren();
+        els.log.prepend(li);
+        while (els.log.children.length > 8) els.log.lastElementChild.remove();
+      }
+      function status(text, state='') {
+        els.statusText.textContent = text;
+        els.statusDot.className = 'dot' + (state ? ' ' + state : '');
+      }
+      function refreshCountdown() {
+        if (!active) { els.countdown.textContent = 'Пауза'; els.progressBar.style.width = '0%'; return; }
+        const remaining = Math.max(0, nextTickAt - Date.now());
+        els.countdown.textContent = Math.ceil(remaining / 1000) + ' с';
+        els.progressBar.style.width = (100 * (1 - Math.min(INTERVAL, remaining) / INTERVAL)).toFixed(1) + '%';
+      }
+      async function ping() {
+        if (pending) { log('Предыдущий запрос ещё выполняется'); return; }
+        pending = true;
+        els.ping.disabled = true;
+        attempts += 1;
+        els.sentCount.textContent = attempts.toLocaleString('ru-RU');
+        els.lastTime.textContent = timeFormat.format(new Date());
+        els.lastResult.textContent = 'Ожидание...';
+        status('Отправка запроса...', 'active');
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT);
+        const started = performance.now();
+        try {
+          // no-cors allows a simple cross-origin GET without requiring a CORS-enabled API.
+          // The returned response is opaque: its HTTP status/body cannot be checked.
+          await fetch(url, {method:'GET', mode:'no-cors', credentials:'omit', cache:'no-store', redirect:'follow', signal:controller.signal});
+          const elapsed = Math.round(performance.now() - started);
+          els.lastResult.textContent = 'Получен*';
+          if (active) status('Запрос выполнен*', 'active');
+          log('Запрос завершён за ' + elapsed + ' мс (статус HTTP не проверен)');
+        } catch(err) {
+          const timedOut = err && err.name === 'AbortError';
+          els.lastResult.textContent = timedOut ? 'Тайм-аут' : 'Ошибка сети';
+          if (active) status('Не удалось проверить', 'error');
+          log(timedOut ? 'Тайм-аут запроса (20 секунд)' : 'Сетевая ошибка или блокировка браузером', true);
+        } finally {
+          clearTimeout(timeout);
+          pending = false;
+          els.ping.disabled = false;
+          if (!active) status('Монитор остановлен');
+        }
+      }
+      function stop() {
+        active = false;
+        clearInterval(intervalId);
+        intervalId = null;
+        els.toggle.textContent = 'Запустить монитор';
+        status('Монитор остановлен');
+        refreshCountdown();
+        log('Монитор поставлен на паузу');
+      }
+      function start() {
+        active = true;
+        if (intervalId !== null) clearInterval(intervalId);
+        intervalId = setInterval(() => {
+          nextTickAt = Date.now() + INTERVAL;
+          refreshCountdown();
+          ping();
+        }, INTERVAL);
+        nextTickAt = Date.now() + INTERVAL;
+        els.toggle.textContent = 'Остановить монитор';
+        log('Монитор запущен (каждые 30 секунд)');
+        refreshCountdown();
+        ping();
+      }
+      els.toggle.addEventListener('click', () => active ? stop() : start());
+      els.ping.addEventListener('click', ping);
+      els.form.addEventListener('submit', event => {
+        event.preventDefault();
+        let parsed;
+        try { parsed = new URL(els.url.value.trim()); }
+        catch { els.validation.textContent = 'Введите корректный HTTPS-адрес.'; return; }
+        if (parsed.protocol !== 'https:' || parsed.username || parsed.password) {
+          els.validation.textContent = 'Нужен HTTPS-адрес без логина и пароля.';
+          return;
+        }
+        url = parsed.toString();
+        localStorage.setItem('uiirmehub-monitor-target', url);
+        els.validation.textContent = 'Адрес сохранён. Следующие запросы пойдут на него.';
+        log('Адрес сервера обновлён');
+        if (active) ping();
+      });
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden && active) {
+          // Some browsers throttle or suspend JavaScript in background tabs.
+          // Reset the countdown when the user returns; do not claim 24/7 operation.
+          clearInterval(intervalId);
+          intervalId = setInterval(() => {
+            nextTickAt = Date.now() + INTERVAL;
+            refreshCountdown();
+            ping();
+          }, INTERVAL);
+          nextTickAt = Date.now() + INTERVAL;
+          refreshCountdown();
+          log('Вкладка активна: расписание проверок восстановлено');
+          ping();
+        }
+      });
+      setInterval(refreshCountdown, 500);
+      start();
+    })();
+  </script>
+</body>
+</html>
