@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#080d1b">
-  <meta name="description" content="ÜiirmeHub Pulse — стильная панель мониторинга Render с запросами каждые 30 секунд, журналом событий и графиком проверок.">
+  <meta name="description" content="ÜiirmeHub Pulse — стильная панель мониторинга Render с автоматическими проверками из GitHub Actions, журналом и Telegram-уведомлениями.">
   <title>ÜiirmeHub Pulse — Server Monitor</title>
   <style>
     :root {
@@ -228,11 +228,11 @@
           <div class="top-actions"><div class="top-clock"><span id="currentDate">—</span><strong id="currentClock">—</strong></div><button class="icon-button" type="button" id="themeBtn" title="Переключить тему" aria-label="Переключить тёмную и светлую тему"><svg class="icon" id="themeIcon"><use href="#i-sun"/></svg></button></div>
         </header>
         <main id="overview">
-          <div class="page-heading"><div><div class="eyebrow">SYSTEM OBSERVABILITY</div><h1>Твой сервер. Под контролем.</h1><p class="lead">Браузер обращается к Render каждые <strong style="color:var(--text)">30 секунд</strong>. GitHub Actions независимо проверяет HTTP-ответ и сохраняет историю в репозитории.</p></div><div class="header-pill"><span class="mini-dot" id="headerDot"></span><span id="headerState">Монитор запускается</span></div></div>
+          <div class="page-heading"><div><div class="eyebrow">SYSTEM OBSERVABILITY</div><h1>Твой сервер. Под контролем.</h1><p class="lead">GitHub Actions проверяет Render примерно <strong style="color:var(--text)">каждые 5 минут</strong>, сохраняет историю и сообщает о сбоях в Telegram. Твой компьютер может быть выключен.</p></div><div class="header-pill"><span class="mini-dot" id="headerDot"></span><span id="headerState">Монитор запускается</span></div></div>
           <section class="panel hero" aria-labelledby="heroStateText">
             <div class="hero-main"><div class="hero-label">ТЕКУЩЕЕ СОСТОЯНИЕ</div><div class="hero-state"><span class="status-orb" id="statusOrb"></span><span id="heroStateText" aria-live="polite">Запуск проверки...</span></div><p class="hero-desc" id="heroDescription">Загружаем подтверждённый HTTP-статус из GitHub Actions.</p>
-              <div class="hero-actions"><button class="btn btn-primary" type="button" id="toggleBtn"><svg class="icon"><use href="#i-pause"/></svg><span>Остановить</span></button><button class="btn btn-dark" type="button" id="pingBtn"><svg class="icon"><use href="#i-refresh"/></svg><span>Проверить сейчас</span></button></div>
-              <div class="hero-meta"><span><svg class="icon"><use href="#i-clock"/></svg> Интервал 30 сек</span><span><svg class="icon"><use href="#i-shield"/></svg> Без персональных данных</span><span id="cloudFresh">GitHub: ожидаем</span></div>
+              <div class="hero-actions"><a class="btn btn-primary" href="https://github.com/igorbakanov200505-create/Render2/actions/workflows/monitor.yml" target="_blank" rel="noopener noreferrer"><svg class="icon"><use href="#i-play"/></svg><span>Запустить в GitHub</span></a><button class="btn btn-dark" type="button" id="pingBtn"><svg class="icon"><use href="#i-refresh"/></svg><span>Обновить данные</span></button></div>
+              <div class="hero-meta"><span><svg class="icon"><use href="#i-clock"/></svg> GitHub · ~5 мин</span><span><svg class="icon"><use href="#i-shield"/></svg> Без персональных данных</span><span id="cloudFresh">GitHub: ожидаем</span></div>
             </div>
             <div class="orbital" aria-hidden="true"><span class="orbit"></span><span class="orbit"></span><span class="orbit"></span><span class="core"><svg class="icon"><use href="#i-pulse"/></svg></span></div>
           </section>
@@ -244,16 +244,16 @@
           </section>
           <div class="grid-main">
             <section class="panel section" id="analytics" aria-labelledby="analyticsTitle"><div class="section-head"><div><h2 class="section-title" id="analyticsTitle">Время выполнения запросов</h2><p class="section-note">Последние 30 проверок GitHub Actions · реальные HTTP-ответы</p></div><span class="small-tag">GITHUB DATA</span></div><div class="chart-wrap"><svg id="trendChart" role="img" aria-label="График времени выполнения запросов" viewBox="0 0 650 215" preserveAspectRatio="none"></svg><div class="chart-empty" id="chartEmpty"><svg class="icon"><use href="#i-chart"/></svg><strong>Собираем статистику</strong><span>График появится после первых запросов</span></div></div><div class="chart-footer"><span class="legend"><i></i>Время запроса, мс</span><span id="chartCaption">Нет данных</span></div></section>
-            <section class="panel section" aria-labelledby="cycleTitle"><div class="section-head"><div><h2 class="section-title" id="cycleTitle">Цикл мониторинга</h2><p class="section-note">Браузер каждые 30 секунд · GitHub каждые 5 минут</p></div><span class="small-tag" id="cycleBadge">АКТИВЕН</span></div><div class="details"><div class="detail"><span class="key">Следующий запрос</span><span class="value" id="countdown">—</span></div><div class="detail"><span class="key">Последний результат</span><span class="value" id="lastResult">—</span></div><div class="detail"><span class="key">Длительность</span><span class="value" id="lastDuration">—</span></div><div class="detail"><span class="key">Точка проверки</span><span class="value" id="serverHost">—</span></div></div><div class="cycle-track" role="progressbar" aria-label="Прогресс до следующей проверки" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="progressWrap"><div id="cycleProgress" class="cycle-progress"></div></div><div class="cycle-label"><span id="cycleHint">Новый запрос выполняется автоматически</span><span>30 с</span></div><p class="helper">Запросов браузера: <strong id="browserAttempts">0</strong> · <span id="browserState">Ожидаем</span></p></section>
+            <section class="panel section" aria-labelledby="cycleTitle"><div class="section-head"><div><h2 class="section-title" id="cycleTitle">Цикл мониторинга</h2><p class="section-note">Работает в GitHub Actions · компьютер не нужен</p></div><span class="small-tag" id="cycleBadge">АКТИВЕН</span></div><div class="details"><div class="detail"><span class="key">Следующий запрос</span><span class="value" id="countdown">—</span></div><div class="detail"><span class="key">Последний результат</span><span class="value" id="lastResult">—</span></div><div class="detail"><span class="key">Длительность</span><span class="value" id="lastDuration">—</span></div><div class="detail"><span class="key">Точка проверки</span><span class="value" id="serverHost">—</span></div></div><div class="cycle-track" role="progressbar" aria-label="Прогресс до следующей проверки" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="progressWrap"><div id="cycleProgress" class="cycle-progress"></div></div><div class="cycle-label"><span id="cycleHint">Новый запрос выполняется автоматически</span><span>~5 мин</span></div><p class="helper">Выполняется на серверах GitHub · <span id="browserState">не зависит от браузера</span></p></section>
           </div>
           <div class="bottom-grid">
             <section class="panel section" id="events" aria-labelledby="eventsTitle"><div class="section-head"><div><h2 class="section-title" id="eventsTitle">Последние события</h2><p class="section-note">Проверки хранятся в GitHub, доступны на других устройствах</p></div><button class="btn btn-muted" type="button" id="exportBtn" title="Скачать журнал CSV"><svg class="icon"><use href="#i-download"/></svg> CSV</button></div><ul class="log-list" id="eventList"><li class="log-empty">Событий пока нет</li></ul></section>
             <section class="panel section" id="settings" aria-labelledby="settingsTitle"><div class="section-head"><div><h2 class="section-title" id="settingsTitle">Настройки сервера</h2><p class="section-note">Общие настройки хранятся в monitor/config.json</p></div><span class="small-tag">CONFIG</span></div>
               <form id="serverForm"><label for="serverUrl" class="form-label">Публичный адрес Render (из GitHub config.json)</label><div class="field"><svg class="icon"><use href="#i-link"/></svg><input id="serverUrl" name="serverUrl" type="url" placeholder="https://clubium-render.onrender.com/" required readonly aria-readonly="true" autocomplete="url" spellcheck="false" inputmode="url"></div><div class="config-actions"><button class="btn btn-primary" type="submit">Обновить статус</button><button class="btn btn-muted" type="button" id="copyBtn"><svg class="icon"><use href="#i-copy"/></svg> Копировать</button><button class="btn btn-muted" type="button" id="clearBtn" title="Очистить только локальные события (история GitHub сохранится)"><svg class="icon"><use href="#i-trash"/></svg></button></div><p class="config-message" id="configMessage" role="status"></p></form>
-              <p class="helper">Адрес для всех устройств меняется в <code>monitor/config.json</code> на GitHub. На HTML-сайте нельзя безопасно записывать изменения напрямую в репозиторий без отдельной авторизации. Используется только публичный GET — данные учащихся не передаются.</p>
+              <p class="helper">Адрес для всех устройств меняется в <code>monitor/config.json</code> на GitHub. На HTML-сайте нельзя безопасно записывать изменения напрямую в репозиторий без отдельной авторизации. Проверка выполняется с серверов GitHub; данные учащихся не передаются.</p>
             </section>
           </div>
-          <aside class="panel notice" aria-label="Статус автоматизации"><span class="notice-icon"><svg class="icon"><use href="#i-shield"/></svg></span><div><strong>Подтверждённый мониторинг через GitHub Actions</strong><p>Вместо режима <code>no-cors</code> сервер GitHub сам проверяет HTTP-код и сохраняет результат в репозитории. <b id="syncState">Проверяем связь с GitHub...</b> Облачная проверка работает без открытого браузера после настройки Actions и Pages. Браузерные запросы каждые 30 секунд выполняются только при открытой вкладке, а без CORS браузер не может прочитать их HTTP-статус. Сервис Render всё равно может перезапуститься или достичь лимитов Free.</p></div></aside>
+          <aside class="panel notice" aria-label="Статус автоматизации"><span class="notice-icon"><svg class="icon"><use href="#i-shield"/></svg></span><div><strong>Подтверждённый мониторинг через GitHub Actions</strong><p>Вместо режима <code>no-cors</code> сервер GitHub сам проверяет HTTP-код и сохраняет результат в репозитории. <b id="syncState">Проверяем связь с GitHub...</b> Облачная проверка работает без открытого браузера после настройки Actions и Pages. Telegram-бот отправляет уведомления после двух неудачных проверок; команды обрабатываются по расписанию GitHub. Токен хранится только в GitHub Secrets. Сервис Render всё равно может перезапуститься или достичь лимитов Free.</p></div></aside>
         </main>
         <footer class="footer"><span>© ÜiirmeHub Pulse · Публичные HTTP-статусы без личных данных</span><span><a href="https://render.com/docs/free" target="_blank" rel="noopener noreferrer">Правила Render Free</a> · <a href="https://docs.github.com/en/pages" target="_blank" rel="noopener noreferrer">GitHub Pages</a></span></footer>
       </div>
@@ -263,12 +263,10 @@
   <script>
 (() => {
   'use strict';
-  const INTERVAL = 30_000;
-  const TIMEOUT = 18_000;
-  const STALE_AFTER = 18 * 60_000;
+  const INTERVAL = 300_000;
+    const STALE_AFTER = 18 * 60_000;
   const DEFAULT_URL = 'https://clubium-render.onrender.com/';
   const K_THEME = 'uiirmehub-pulse-theme-v3';
-  const K_ACTIVE = 'uiirmehub-pulse-browser-active-v3';
   const $ = id => document.getElementById(id);
   const E = (tag, cls, value) => { const el=document.createElement(tag); if(cls) el.className=cls; if(value!==undefined) el.textContent=value; return el; };
   const fmtTime = date => new Date(date).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
@@ -276,9 +274,8 @@
   const safeGet = (k,fallback) => {try{return localStorage.getItem(k)??fallback;}catch{return fallback;}};
   const safeSet = (k,v) => {try{localStorage.setItem(k,v);}catch{}};
   const icon = name=>`<svg class="icon"><use href="#i-${name}"/></svg>`;
-  const $ping = $('pingBtn'), $toggle = $('toggleBtn');
-  let url=DEFAULT_URL, active=safeGet(K_ACTIVE,'true')!=='false', busy=false, nextAt=Date.now()+INTERVAL;
-  let timerId=0, toastTimer=0, cloud=null, browserAttempts=0, browserReadable=false, browserFailed=false;
+  const $ping = $('pingBtn');
+  let url=DEFAULT_URL, toastTimer=0, cloud=null;
   let localEvents=[];
 
   document.documentElement.dataset.theme=safeGet(K_THEME,'dark')==='light'?'light':'dark';
@@ -340,7 +337,7 @@
     $('lastResult').textContent=t?(cloud.status==='up'?'HTTP '+cloud.http_status:cloud.http_status?'HTTP '+cloud.http_status:'Нет ответа'):'—';
     $('lastResult').style.color=t?(cloud.status==='up'?'var(--good)':'var(--bad)'):'var(--text)';
     $('lastDuration').textContent=t&&Number.isFinite(cloud.duration_ms)?cloud.duration_ms+' мс':'—';
-    $('browserAttempts').textContent=String(browserAttempts);
+
   }
   function renderEvents(){
     const list=$('eventList');list.replaceChildren();
@@ -396,52 +393,18 @@
     }
     setCloudView();renderMetrics();
   }
-  async function ping(origin='manual'){
-    if(busy)return;
-    busy=true;$ping.disabled=true;browserAttempts++;renderMetrics();
-    const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),TIMEOUT);
-    let result='unknown';
-    try{
-      // CORS is intentional: a readable response proves the actual HTTP status.
-      // If cross-origin response headers are absent, the request may still reach Render,
-      // but the browser cannot reliably distinguish a CORS rejection from network failure.
-      const response=await fetch(url,{method:'GET',mode:'cors',credentials:'omit',cache:'no-store',redirect:'follow',signal:controller.signal});
-      browserReadable=true;browserFailed=!response.ok;result=response.ok?'ok':'fail';
-      addLocalEvent('Проверка браузера · HTTP '+response.status,'Ответ доступен благодаря CORS',result);
-      $('browserState').textContent='HTTP '+response.status+' · CORS разрешён';
-    }catch(e){
-      browserReadable=false;browserFailed=true;
-      $('browserState').textContent=e.name==='AbortError'?'Тайм-аут браузера':'HTTP недоступен браузеру (CORS или сеть)';
-      if(origin==='manual')addLocalEvent('Запрос браузера','HTTP-ответ не удалось прочитать; смотри подтверждённый статус GitHub','neutral');
-    }finally{clearTimeout(timeout);busy=false;$ping.disabled=false;}
-    await loadRemoteStatus();
-    return result;
-  }
-  function setActiveButtons(){
-    $('cycleBadge').textContent=active?'BROWSER ON':'ПАУЗА';
-    $toggle.querySelector('span').textContent=active?'Остановить':'Запустить';
-    $toggle.querySelector('use').setAttribute('href',active?'#i-pause':'#i-play');
-  }
   function countdown(){
-    if(!active){$('countdown').textContent='Пауза';$('cycleProgress').style.width='0%';$('progressWrap').setAttribute('aria-valuenow','0');$('cycleHint').textContent='Облачные проверки GitHub продолжаются';return;}
-    const remaining=Math.max(0,nextAt-Date.now());
-    $('countdown').textContent=Math.ceil(remaining/1000)+' сек';
-    const value=Math.round(100*(1-remaining/INTERVAL));$('cycleProgress').style.width=value+'%';$('progressWrap').setAttribute('aria-valuenow',String(value));
-    $('cycleHint').textContent=busy?'Браузер выполняет запрос':'Следующий браузерный запрос';
+    const t=cloudCheckedTime(), age=t===null?null:Math.max(0,Date.now()-t);
+    $('countdown').textContent=age===null?'Ожидаем':age<INTERVAL?'≈ '+Math.ceil((INTERVAL-age)/60000)+' мин':'По расписанию';
+    const percent=age===null?0:Math.min(100,Math.round(age/INTERVAL*100));
+    $('cycleProgress').style.width=percent+'%';
+    $('progressWrap').setAttribute('aria-valuenow',String(percent));
+    $('cycleHint').textContent='Запуск GitHub может задержаться — время ориентировочное';
   }
-  function schedule(){clearTimeout(timerId);if(!active)return;nextAt=Date.now()+INTERVAL;countdown();timerId=setTimeout(async()=>{
-      if(!active)return;
-      schedule(); // schedule independent of fetch duration; no overlapping calls.
-      await ping('auto');
-    },INTERVAL);
-  }
-  function start(){active=true;safeSet(K_ACTIVE,'true');setActiveButtons();schedule();ping('auto');}
-  function stop(){active=false;safeSet(K_ACTIVE,'false');clearTimeout(timerId);nextAt=0;setActiveButtons();countdown();}
-  $toggle.addEventListener('click',()=>{active?stop():start();toast(active?'Запросы браузера запущены':'Браузер остановлен; GitHub продолжает проверки');});
-  $ping.addEventListener('click',()=>ping('manual'));
+  $ping.addEventListener('click',()=>{loadRemoteStatus();toast('Обновляем опубликованные данные GitHub');});
   $('serverForm').addEventListener('submit',e=>{e.preventDefault();loadRemoteStatus();toast('Обновляем данные из GitHub');});
   $('copyBtn').addEventListener('click',async()=>{try{await navigator.clipboard.writeText(url);toast('Адрес скопирован');}catch{toast('Скопируй адрес из поля вручную');}});
-  $('clearBtn').addEventListener('click',()=>{localEvents=[];browserAttempts=0;renderEvents();renderMetrics();toast('Локальная история очищена. История GitHub сохранена.');});
+  $('clearBtn').addEventListener('click',()=>{localEvents=[];renderEvents();renderMetrics();toast('Локальные события очищены. История GitHub сохранена.');});
   $('exportBtn').addEventListener('click',()=>{
     const rows=cloudHistory();if(!rows.length){toast('Облачная история пока не загружена');return;}
     const cells=[['UTC','HTTP','Статус','Длительность (мс)','Ошибка'],...rows.map(x=>[x.checked_at,x.http_status??'',x.status,x.duration_ms,x.error??''])];
@@ -451,16 +414,11 @@
     toast('История GitHub выгружена');
   });
   function tick(){const now=new Date();$('currentDate').textContent=now.toLocaleDateString('ru-RU',{day:'numeric',month:'long',year:'numeric'});$('currentClock').textContent=fmtTime(now);countdown();setCloudView();}
-  document.addEventListener('visibilitychange',()=>{
-    if(document.hidden)return;
-    loadRemoteStatus();
-    if(active && Date.now()>nextAt+1000){schedule();ping('auto');}
-  });
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)loadRemoteStatus();});
   document.querySelectorAll('.nav a[href^="#"]').forEach(a=>a.addEventListener('click',()=>{document.querySelectorAll('.nav a').forEach(item=>item.classList.remove('active'));a.classList.add('active');}));
   const startup=async()=>{
-    syncURL();setActiveButtons();renderMetrics();renderEvents();renderChart();
+    syncURL();renderMetrics();renderEvents();renderChart();
     await loadConfig();await loadRemoteStatus();
-    if(active){schedule();ping('auto');}
     setInterval(()=>{loadRemoteStatus();},INTERVAL);
     setInterval(tick,1000);tick();
   };

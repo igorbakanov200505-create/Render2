@@ -1,0 +1,18 @@
+ÜIIRMEHUB PULSE — GITHUB-ONLY (без ПК и Cloudflare)
+
+1) https://github.com/igorbakanov200505-create/Render2/new/main
+2) Name your file: .github/workflows/monitor.yml
+3) Вставить ВСЁ из WORKFLOW_COPY.txt → Commit changes
+4) https://github.com/igorbakanov200505-create/Render2/settings/pages → Source: GitHub Actions
+5) https://github.com/igorbakanov200505-create/Render2/settings/actions → Workflow permissions: Read and write
+6) https://github.com/igorbakanov200505-create/Render2/actions → Run workflow
+7) Telegram: @BotFather → /newbot; отправить /start своему боту
+8) https://github.com/igorbakanov200505-create/Render2/settings/secrets/actions
+   TELEGRAM_BOT_TOKEN = токен BotFather
+   TELEGRAM_CHAT_ID   = числовой ID чата
+9) Запустить workflow ещё раз.
+
+ПОДРОБНО: README.md
+
+ВАЖНО: GitHub Actions поддерживает расписание с минимальным интервалом 5 минут,
+не 30 секунд; возможны задержки и пропуски. /status в Telegram не мгновенный.

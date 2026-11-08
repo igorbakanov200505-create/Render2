@@ -1,0 +1,141 @@
+#!/usr/bin/env python3
+"""Telegram notification + deferred bot commands for a GitHub Actions cron job.
+
+This script runs only on GitHub Actions, never in browser or local PC.
+Secrets are read from GitHub Actions secrets and never committed.
+"""
+import json
+import os
+from pathlib import Path
+from urllib import request, error
+
+ROOT = Path(__file__).resolve().parent.parent
+STATUS_FILE = ROOT / 'data' / 'status.json'
+STATE_FILE = ROOT / 'data' / 'bot_state.json'
+
+
+def safe_read(path, fallback):
+    try:
+        x = json.loads(path.read_text(encoding='utf8'))
+        return x if isinstance(x, dict) else fallback
+    except (OSError, ValueError):
+        return fallback
+
+
+def api(token, method, payload):
+    """Return Telegram result or None; never log token or response body."""
+    data = json.dumps(payload, ensure_ascii=False).encode('utf-8')
+    req = request.Request(
+        f'https://api.telegram.org/bot{token}/{method}',
+        data=data,
+        headers={'Content-Type': 'application/json', 'User-Agent': 'UiirmeHub-Pulse-GitHub/4'},
+        method='POST',
+    )
+    try:
+        with request.urlopen(req, timeout=15) as res:
+            result = json.load(res)
+        if not result.get('ok'):
+            print(f'Telegram {method}: API reported error')
+            return None
+        return result.get('result')
+    except (OSError, ValueError, error.HTTPError, error.URLError):
+        print(f'Telegram {method}: unavailable or misconfigured')
+        return None
+
+
+def summary(current):
+    timestamp = current.get('checked_at') or 'нет данных'
+    status = current.get('status')
+    label = '🟢 ДОСТУПЕН' if status == 'up' else ('🔴 НЕДОСТУПЕН' if status == 'down' else '⚪ НЕТ ДАННЫХ')
+    code = current.get('http_status')
+    milliseconds = current.get('duration_ms')
+    error_text = current.get('error')
+    return (f'ÜiirmeHub Pulse\n{label}\n'
+            f'HTTP: {code if code is not None else "—"}\n'
+            f'Отклик: {milliseconds if milliseconds is not None else "—"} мс\n'
+            f'UTC: {timestamp}' + (f'\nОшибка: {str(error_text)[:150]}' if status == 'down' and error_text else ''))
+
+
+def history_text(current):
+    history = current.get('history', [])
+    if not isinstance(history, list) or not history:
+        return 'История проверок пока пуста.'
+    lines = ['Последние проверки ÜiirmeHub:']
+    for item in history[-8:][::-1]:
+        mark = '🟢' if item.get('status') == 'up' else '🔴'
+        lines.append(f'{mark} {item.get("checked_at", "?")} · HTTP {item.get("http_status") or "—"} · {item.get("duration_ms", "—")} мс')
+    return '\n'.join(lines)
+
+
+def evaluate_alert(state, current, send):
+    """Alert after 2 consecutive failures; alert on recovery only after a sent failure notice."""
+    is_up = current.get('status') == 'up'
+    streak = 0 if is_up else int(state.get('failure_streak', 0)) + 1
+    state['failure_streak'] = streak
+    open_alert = bool(state.get('alert_open'))
+    if not is_up and streak >= 2 and not open_alert:
+        msg = '🚨 ÜiirmeHub: сервер не отвечает две проверки подряд!\n\n' + summary(current)
+        if send(msg):
+            state['alert_open'] = True
+    elif is_up and open_alert:
+        msg = '✅ ÜiirmeHub: доступ восстановлен!\n\n' + summary(current)
+        if send(msg):
+            state['alert_open'] = False
+    return state
+
+
+def handle_commands(token, chat_id, state, current, call_api=api):
+    """Process commands when the 5-minute Actions workflow executes, not instantly."""
+    offset = max(0, int(state.get('update_offset', 0)))
+    updates = call_api(token, 'getUpdates', {'offset': offset, 'limit': 50, 'timeout': 0, 'allowed_updates': ['message']})
+    if not isinstance(updates, list):
+        return state
+    for update in updates:
+        try:
+            update_id = int(update.get('update_id', 0))
+            msg = update.get('message') or {}
+            incoming_chat = str((msg.get('chat') or {}).get('id', ''))
+            command = str(msg.get('text', '')).strip().split(' ', 1)[0].split('@', 1)[0].lower()
+            if incoming_chat != chat_id:  # Never reply to unauthorized chats.
+                state['update_offset'] = max(int(state.get('update_offset', 0)), update_id + 1)
+                continue
+            reply = {
+                '/start': '🤖 ÜiirmeHub Pulse подключён!\nКоманды: /status /history /check /help\nПроверка работает в GitHub Actions, а ответы приходят при ближайшем запуске (обычно около 5 минут).',
+                '/help': 'Команды: /status — состояние; /history — последние проверки; /check — последняя проверка GitHub; /help — помощь.',
+                '/status': summary(current),
+                '/check': 'Последняя проверка, выполненная GitHub Actions:\n\n' + summary(current),
+                '/history': history_text(current),
+            }.get(command)
+            if reply:
+                result = call_api(token, 'sendMessage', {'chat_id': chat_id, 'text': reply})
+                if result is None:
+                    # Retry from this update at the next scheduled run.
+                    break
+            state['update_offset'] = max(int(state.get('update_offset', 0)), update_id + 1)
+        except (ValueError, TypeError, AttributeError):
+            # Skip corrupt updates; prevent one malformed item blocking the queue.
+            continue
+    return state
+
+
+def run(token=None, chat_id=None):
+    token = token if token is not None else os.environ.get('TELEGRAM_BOT_TOKEN', '').strip()
+    chat_id = chat_id if chat_id is not None else os.environ.get('TELEGRAM_CHAT_ID', '').strip()
+    if not token or not chat_id:
+        print('Telegram отключён: добавьте Secrets TELEGRAM_BOT_TOKEN и TELEGRAM_CHAT_ID в GitHub.')
+        return
+    current = safe_read(STATUS_FILE, {})
+    if current.get('status') not in ('up', 'down'):
+        print('Нет завершённой проверки HTTP')
+        return
+    state = safe_read(STATE_FILE, {'failure_streak': 0, 'alert_open': False, 'update_offset': 0})
+    send = lambda msg: api(token, 'sendMessage', {'chat_id': chat_id, 'text': msg}) is not None
+    evaluate_alert(state, current, send)
+    handle_commands(token, chat_id, state, current)
+    STATE_FILE.parent.mkdir(parents=True, exist_ok=True)
+    STATE_FILE.write_text(json.dumps(state, ensure_ascii=False, indent=2) + '\n', encoding='utf8')
+    print('Telegram: обработка завершена')
+
+
+if __name__ == '__main__':
+    run()
