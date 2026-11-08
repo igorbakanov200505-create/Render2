@@ -1,0 +1,6 @@
+{
+  "target_url": "https://clubium-render.onrender.com/",
+  "timeout_seconds": 35,
+  "max_history": 288,
+  "expected_http_status": [200, 204, 301, 302]
+}

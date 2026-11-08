@@ -1,0 +1,8 @@
+UIIRMEHUB RENDER2 — FIXED PACK
+
+1. Распакуй архив в папку.
+2. Запусти INSTALL_RENDER2.cmd.
+3. Если Git не установлен, смотри README.md: вариант 2, установка прямо на GitHub.
+
+Правильный путь: .github/workflows/monitor.yml
+GitHub Actions: https://github.com/igorbakanov200505-create/Render2/actions
