@@ -1,251 +1,481 @@
-<!doctype html>
-<html lang="ru">
+<!DOCTYPE html>
+<html lang="ru" data-theme="dark">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="color-scheme" content="dark">
-  <meta name="theme-color" content="#0b1020">
-  <meta name="description" content="ÜiirmeHub Monitor — отправка запросов на Render каждые 30 секунд, пока страница открыта.">
-  <title>ÜiirmeHub • Render Monitor</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#080d1b">
+  <meta name="description" content="ÜiirmeHub Pulse — стильная панель мониторинга Render с запросами каждые 30 секунд, журналом событий и графиком проверок.">
+  <title>ÜiirmeHub Pulse — Server Monitor</title>
   <style>
-    :root { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #f0f4ff; background:#0b1020; }
-    * { box-sizing:border-box; }
-    body { margin:0; min-height:100vh; background:radial-gradient(circle at 85% 10%, #24245c77, transparent 34%), radial-gradient(circle at 0 75%, #0e536044, transparent 40%), #0b1020; }
-    .page { width:min(1020px, calc(100% - 32px)); margin:0 auto; padding:36px 0 50px; }
-    header { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:42px; }
-    .brand {display:flex;align-items:center;gap:13px;font-size:18px;font-weight:760;letter-spacing:.2px}
-    .logo { width:42px; height:42px; display:grid; place-items:center; border-radius:14px; background:linear-gradient(145deg,#7c7cf4,#3ed6cd); font-size:22px; color:#060d1d; box-shadow:0 7px 28px #42d9d944 }
-    .tag {border:1px solid #ffffff26; color:#adbad3; background:#ffffff08; padding:7px 12px;border-radius:30px;font-size:12px;white-space:nowrap}
-    h1 { margin:0; font-size:clamp(32px,5vw,51px); line-height:1.09; letter-spacing:-1.7px; }
-    .accent { color:#99a1ff; }
-    .intro { color:#aeb9d2; font-size:15px; line-height:1.7; max-width:700px; margin:15px 0 28px; }
-    .panel { border:1px solid #ffffff1b; background:#151b2ddc; border-radius:22px; box-shadow:0 22px 65px #00000022; }
-    .main-panel { padding:28px; }
-    .status-row {display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
-    .status-label {font-size:13px;color:#9eabc3;font-weight:620;text-transform:uppercase;letter-spacing:1px}
-    .status {display:flex;align-items:center;gap:10px; margin-top:12px; font-size:25px;font-weight:730;}
-    .dot { height:12px;width:12px;border-radius:50%;background:#f9b857;box-shadow:0 0 0 5px #f9b85722;flex-shrink:0 }
-    .dot.active {background:#50d1a6; box-shadow:0 0 0 5px #50d1a622}
-    .dot.error {background:#ff7181; box-shadow:0 0 0 5px #ff718122}
-    .clock { border-radius:13px; background:#0d1425; border:1px solid #ffffff12; padding:11px 15px; min-width:138px;text-align:center; }
-    .clock small { display:block;color:#91a1bf;font-size:12px;margin-bottom:4px}
-    .clock strong {font-size:23px;font-variant-numeric:tabular-nums}
-    .progress {height:7px;border-radius:20px;background:#293348;margin:25px 0 18px;overflow:hidden}
-    .progress-fill {height:100%;width:0%;background:linear-gradient(90deg,#5a88ed,#49d1be);border-radius:20px;transition:width .4s linear}
-    .stats {display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:16px 0 22px;}
-    .stat {background:#10182a;border:1px solid #ffffff13;border-radius:15px;padding:17px 18px;min-width:0}
-    .stat .stat-name {font-size:12px;color:#9cabc5;margin-bottom:7px}
-    .stat .stat-value {font-size:23px;font-weight:740;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
-    .controls {display:flex;flex-wrap:wrap;gap:11px;margin:22px 0 0}
-    button {font:inherit;cursor:pointer;border-radius:12px;min-height:44px;padding:11px 18px;font-weight:700;border:1px solid transparent;transition:transform .2s,background .2s}
-    button:active {transform:translateY(1px)}
-    .primary {background:#7778ed;color:#fff}
-    .primary:hover {background:#8b8cf8}
-    .secondary {background:#ffffff0c;color:#d8e2f4;border-color:#ffffff22}
-    .secondary:hover {background:#ffffff1c}
-    button:disabled {opacity:.45;cursor:not-allowed}
-    .section-heading {font-size:18px;font-weight:730;margin:0 0 18px}
-    .grid {display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,0.95fr);gap:17px;margin-top:17px}
-    .subpanel {padding:23px}
-    label {display:block;color:#a7b7d1;font-size:12px;font-weight:680;margin-bottom:9px}
-    .input-row {display:flex;gap:8px;flex-wrap:wrap}
-    input {min-width:100px;flex:1;padding:12px 12px;border:1px solid #ffffff29;outline:none;color:#fff;border-radius:11px;background:#0c1324;font:inherit;font-size:13px}
-    input:focus-visible {border-color:#8d92fe; box-shadow:0 0 0 3px #8d92fe22}
-    .hint {color:#91a0bc;font-size:12px;line-height:1.6;margin:12px 0 0}
-    .log {list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px;max-height:220px;overflow:auto}
-    .log li {display:flex;gap:11px;align-items:flex-start;color:#bfcbe1;font-size:12px;border-bottom:1px solid #ffffff10;padding-bottom:10px;line-height:1.45}
-    .log time {font-size:11px;color:#7e8fae;white-space:nowrap}
-    .log .info {color:#64d8ba}
-    .log .bad {color:#ff8c98}
-    .warning {border:1px solid #eeae4c55;border-radius:14px;padding:15px 16px;color:#f5dcae;background:#b77b1611;font-size:12px;line-height:1.7;margin-top:18px}
-    .footer {margin-top:25px;color:#8292b1;text-align:center;font-size:12px;line-height:1.7}
-    a {color:#aaaafa;text-decoration:none}
-    a:hover {text-decoration:underline}
-    @media(max-width:700px){.page{padding-top:20px}header{margin-bottom:29px}.main-panel{padding:20px}.stats{grid-template-columns:1fr 1fr}.stats .stat:last-child{grid-column:1/-1}.grid{grid-template-columns:1fr}.subpanel{padding:20px}.status{font-size:21px}.controls button{flex:1}}
+    :root {
+      color-scheme: dark;
+      --bg:#080c18;--side:#0a1020;--card:#10182a;--card2:#141e33;--surface:#172239;--input:#0c1426;
+      --text:#f0f5ff;--muted:#92a1bd;--soft:#6c7b98;--line:rgba(164,189,241,.12);--line2:rgba(164,189,241,.21);
+      --accent:#897aff;--accent2:#48d9d1;--good:#47d7aa;--bad:#ff718d;--amber:#f6b869;
+      --accentGlow:rgba(112,104,255,.20);--glass:rgba(15,23,41,.89);
+      --shadow:0 24px 65px rgba(0,0,0,.19);
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg:#f4f7ff;--side:#fbfcff;--card:#fff;--card2:#f5f7ff;--surface:#edf2ff;--input:#f7f9ff;
+      --text:#17233d;--muted:#566782;--soft:#8692a9;--line:rgba(50,69,109,.12);--line2:rgba(50,69,109,.22);
+      --accent:#6752dc;--accent2:#078f99;--good:#05936e;--bad:#d84967;--amber:#bc741e;
+      --accentGlow:rgba(103,82,220,.11);--glass:rgba(255,255,255,.96);
+      --shadow:0 20px 45px rgba(41,61,101,.075);
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;font-size:14px;line-height:1.5;min-height:100vh}
+    button,input{font:inherit}button{cursor:pointer}button:disabled{cursor:not-allowed;opacity:.55}
+    a{color:inherit;text-decoration:none}a:focus-visible,button:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+    .icon{width:19px;height:19px;display:inline-block;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+    .app{display:grid;grid-template-columns:242px minmax(0,1fr);min-height:100vh}
+    .sidebar{position:sticky;top:0;height:100vh;background:var(--side);border-right:1px solid var(--line);display:flex;flex-direction:column;padding:27px 16px 20px;z-index:5}
+    .brand{display:flex;align-items:center;gap:12px;padding:0 11px 35px}
+    .brand-mark{width:40px;height:40px;border-radius:13px;background:linear-gradient(135deg,#8777ff 8%,#3dcbd2 95%);box-shadow:0 8px 24px rgba(106,104,249,.24);display:grid;place-items:center;color:#fff;position:relative;overflow:hidden}
+    .brand-mark::after{content:"";position:absolute;inset:5px;border:1px solid rgba(255,255,255,.32);border-radius:10px}
+    .brand-mark svg{width:26px;height:26px;stroke-width:2.1}
+    .brand-name{display:block;font-size:17px;letter-spacing:-.7px;font-weight:800;line-height:1.1}
+    .brand-sub{display:block;font-size:11px;color:var(--muted);letter-spacing:1.5px;font-weight:750;margin-top:5px}
+    .nav-title{padding:0 14px;margin:6px 0 12px;font-size:10px;color:var(--soft);letter-spacing:1.7px;font-weight:800}
+    .nav{display:grid;gap:5px}
+    .nav a{display:flex;align-items:center;gap:12px;padding:12px 14px;font-weight:600;color:var(--muted);border:1px solid transparent;border-radius:12px;transition:.15s background,.15s color}
+    .nav a:hover,.nav a.active{color:var(--text);background:var(--surface)}
+    .nav a.active{background:linear-gradient(100deg,var(--accentGlow),transparent);border-color:var(--line)}
+    .nav a.active .icon{color:var(--accent)}
+    .nav .chev{margin-left:auto;width:15px;height:15px;color:var(--soft)}
+    .side-bottom{margin-top:auto;display:grid;gap:15px}
+    .side-status{padding:15px;border:1px solid var(--line);border-radius:16px;background:var(--card)}
+    .side-status-head{display:flex;justify-content:space-between;align-items:center;font-size:12px;font-weight:750}
+    .side-status p{font-size:11px;color:var(--muted);margin:7px 0 0;line-height:1.6}
+    .version{font-size:11px;padding:0 12px;color:var(--soft)}
+    .main{min-width:0;position:relative;overflow:hidden}
+    .main::before{content:"";position:absolute;top:-210px;right:-290px;width:700px;height:560px;pointer-events:none;background:radial-gradient(ellipse,rgba(103,94,244,.13),transparent 70%)}
+    .main-content{max-width:1430px;margin:0 auto;padding:0 39px 36px;position:relative}
+    .topbar{height:88px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line);gap:15px}
+    .crumbs{display:flex;align-items:center;gap:9px;color:var(--muted);font-weight:600;font-size:13px;min-width:0}
+    .crumbs strong{color:var(--text);font-weight:700;white-space:nowrap}
+    .top-actions{display:flex;align-items:center;gap:16px}
+    .top-clock{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+    .top-clock strong{display:block;color:var(--text);font-size:13px;text-align:right}
+    .icon-button{height:40px;width:40px;display:grid;place-items:center;background:var(--card);border:1px solid var(--line);color:var(--muted);border-radius:12px;transition:.2s}
+    .icon-button:hover{color:var(--text);border-color:var(--line2)}
+    .page-heading{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;padding:35px 0 26px}
+    .eyebrow{display:inline-flex;align-items:center;gap:9px;color:var(--accent2);font-size:11px;font-weight:850;letter-spacing:1.85px;margin-bottom:10px}
+    .eyebrow:before{content:"";height:7px;width:7px;background:var(--accent2);border-radius:50%;box-shadow:0 0 0 4px rgba(72,217,209,.1)}
+    h1{margin:0;font-size:clamp(27px,3.15vw,40px);font-weight:820;letter-spacing:-1.6px;line-height:1.14}
+    .lead{font-size:13.5px;color:var(--muted);margin:12px 0 0;max-width:680px;line-height:1.75}
+    .header-pill{display:flex;align-items:center;gap:8px;background:var(--card);color:var(--muted);border:1px solid var(--line);padding:9px 12px;border-radius:99px;font-size:11px;font-weight:750;white-space:nowrap;margin-top:23px}
+    .mini-dot{height:7px;width:7px;background:var(--good);box-shadow:0 0 0 4px rgba(71,215,170,.11);border-radius:50%;display:inline-block;flex-shrink:0}
+    .mini-dot.off{background:var(--soft);box-shadow:none}
+    .mini-dot.wait{background:var(--amber);box-shadow:none}
+    .panel{border:1px solid var(--line);border-radius:19px;background:var(--glass);box-shadow:var(--shadow)}
+    .hero{position:relative;overflow:hidden;background:linear-gradient(111deg,rgba(22,30,59,.97),rgba(24,29,63,.94) 50%,rgba(28,45,67,.90));border-color:rgba(154,171,255,.17);min-height:245px;display:grid;grid-template-columns:minmax(0,1fr) 310px;padding:29px 32px}
+    :root[data-theme="light"] .hero{background:linear-gradient(110deg,#f1f0ff,#eef6ff)}
+    .hero:after{content:"";pointer-events:none;position:absolute;inset:0;background:radial-gradient(ellipse at 78% 57%,rgba(118,104,255,.20),transparent 38%)}
+    .hero-main{position:relative;z-index:1}
+    .hero-label{font-weight:780;font-size:11px;color:#a9a7ff;letter-spacing:1.5px;text-transform:uppercase}
+    :root[data-theme="light"] .hero-label{color:#6b58d4}
+    .hero-state{display:flex;align-items:center;gap:15px;font-size:clamp(25px,3vw,35px);font-weight:820;letter-spacing:-1.2px;margin:10px 0 7px;line-height:1.2}
+    .status-orb{height:14px;width:14px;display:inline-block;background:var(--amber);border-radius:50%;box-shadow:0 0 0 7px rgba(246,184,105,.12);flex-shrink:0}
+    .status-orb.is-good{background:var(--good);box-shadow:0 0 0 7px rgba(71,215,170,.13),0 0 20px rgba(71,215,170,.15)}
+    .status-orb.is-bad{background:var(--bad);box-shadow:0 0 0 7px rgba(255,113,141,.12)}
+    .status-orb.is-off{background:var(--soft);box-shadow:0 0 0 7px rgba(150,160,185,.12)}
+    .hero-desc{max-width:490px;font-size:12.5px;color:#9caecd;line-height:1.7;margin:0}
+    :root[data-theme="light"] .hero-desc{color:#657596}
+    .hero-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:22px}
+    .btn{min-height:42px;display:inline-flex;align-items:center;justify-content:center;gap:9px;border-radius:11px;font-weight:780;font-size:12px;border:1px solid transparent;padding:0 17px;transition:transform .18s,background .18s,border .18s;white-space:nowrap}
+    .btn:active{transform:scale(.985)}
+    .btn-primary{background:linear-gradient(110deg,#7668f1,#8a77ff);color:white;box-shadow:0 8px 23px rgba(109,90,239,.25)}
+    .btn-primary:hover{background:linear-gradient(110deg,#887cfa,#9a89ff)}
+    .btn-dark{border-color:rgba(179,192,241,.20);background:rgba(255,255,255,.06);color:#e2e9ff}
+    .btn-dark:hover{background:rgba(255,255,255,.11)}
+    :root[data-theme="light"] .btn-dark{color:var(--text);background:rgba(50,64,130,.06);border-color:rgba(75,81,160,.16)}
+    .btn-muted{color:var(--muted);background:var(--surface);border-color:var(--line)}
+    .btn-muted:hover{border-color:var(--line2);color:var(--text)}
+    .hero-meta{color:#96a7c7;display:flex;align-items:center;gap:17px;flex-wrap:wrap;font-size:11px;margin-top:20px;font-weight:600}
+    .hero-meta span{display:flex;gap:7px;align-items:center}
+    :root[data-theme="light"] .hero-meta{color:#637493}
+    .hero-meta .icon{width:14px;height:14px}
+    .orbital{position:relative;display:grid;place-items:center;isolation:isolate;z-index:1}
+    .orbit{width:190px;height:190px;border:1px solid rgba(168,172,255,.18);border-radius:50%;position:absolute;display:grid;place-items:center}
+    .orbit:nth-child(1){width:246px;height:246px;border-style:dashed;animation:rotate 32s linear infinite}
+    .orbit:nth-child(2){width:184px;height:184px;animation:rotate 24s linear infinite reverse}
+    .orbit:nth-child(3){width:116px;height:116px;border-color:rgba(126,233,237,.2);box-shadow:inset 0 0 45px rgba(84,158,255,.06)}
+    .orbit:nth-child(1):after,.orbit:nth-child(2):before{content:"";width:9px;height:9px;border-radius:50%;position:absolute;top:50%;left:-5px;background:#8f91ff;box-shadow:0 0 15px #8f91ff}
+    .orbit:nth-child(2):before{background:#48d9d1;box-shadow:0 0 15px #48d9d1;top:20%;left:4%}
+    .core{width:67px;height:67px;border-radius:23px;display:grid;place-items:center;background:linear-gradient(140deg,#9c8cff,#5078ee 47%,#35d7cd);color:white;box-shadow:0 0 40px rgba(115,99,245,.34);transform:rotate(-12deg)}
+    .core svg{transform:rotate(12deg);width:33px;height:33px}
+    .metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:15px;margin-top:17px}
+    .metric{padding:19px 20px;min-width:0;position:relative;overflow:hidden}
+    .metric-top{display:flex;justify-content:space-between;align-items:center;gap:6px;color:var(--muted);font-size:11.5px;font-weight:700}
+    .metric-icon{width:35px;height:35px;display:grid;place-items:center;border-radius:11px;background:var(--surface);color:var(--accent)}
+    .metric-icon .icon{width:17px;height:17px}
+    .metric[data-tone="green"] .metric-icon{color:var(--good);background:rgba(71,215,170,.08)}
+    .metric[data-tone="red"] .metric-icon{color:var(--bad);background:rgba(255,113,141,.08)}
+    .metric[data-tone="cyan"] .metric-icon{color:var(--accent2);background:rgba(72,217,209,.08)}
+    .metric-value{font-size:clamp(25px,2.7vw,33px);font-weight:820;letter-spacing:-1.15px;font-variant-numeric:tabular-nums;margin-top:12px;line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .metric-sub{color:var(--soft);font-size:10.5px;margin-top:7px}
+    .grid-main{display:grid;grid-template-columns:minmax(0,1.52fr) minmax(320px,1fr);gap:17px;margin-top:17px}
+    .section{padding:23px 24px}
+    .section-head{display:flex;align-items:start;justify-content:space-between;gap:13px;margin-bottom:18px}
+    .section-title{font-size:15.5px;font-weight:800;letter-spacing:-.35px;margin:0}
+    .section-note{font-size:11px;color:var(--soft);margin:5px 0 0}
+    .small-tag{font-size:10px;color:var(--muted);background:var(--surface);border:1px solid var(--line);padding:6px 9px;border-radius:8px;white-space:nowrap;font-weight:700}
+    .chart-wrap{border:1px solid var(--line);background:linear-gradient(180deg,var(--input),transparent);border-radius:13px;padding:10px 10px 2px;position:relative;min-height:240px;overflow:hidden}
+    #trendChart{width:100%;height:217px;display:block;overflow:visible}
+    .chart-empty{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;text-align:center;color:var(--soft);pointer-events:none}
+    .chart-empty strong{color:var(--muted);font-size:13px}
+    .chart-empty .icon{height:24px;width:24px;color:var(--accent)}
+    .chart-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:13px;color:var(--soft);font-size:10.5px}
+    .legend{display:flex;gap:7px;align-items:center;color:var(--muted)}
+    .legend i{height:7px;width:19px;background:var(--accent);border-radius:10px;display:inline-block}
+    .details{display:grid;gap:13px}
+    .detail{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-bottom:12px;border-bottom:1px solid var(--line);font-size:12px}
+    .detail:last-child{border-bottom:0;padding-bottom:0}
+    .detail .key{color:var(--muted)}
+    .detail .value{color:var(--text);font-weight:700;font-variant-numeric:tabular-nums;text-align:right;overflow-wrap:anywhere}
+    .cycle-track{height:8px;border-radius:99px;background:var(--surface);margin-top:15px;overflow:hidden}
+    .cycle-progress{height:100%;width:0;background:linear-gradient(90deg,#7768f4,#4dd5ce);border-radius:99px;transition:width .2s linear}
+    .cycle-label{display:flex;align-items:center;justify-content:space-between;font-size:10.5px;color:var(--soft);margin-top:9px}
+    .bottom-grid{display:grid;grid-template-columns:minmax(0,1.08fr) minmax(310px,.92fr);gap:17px;margin-top:17px}
+    .log-list{list-style:none;padding:0;margin:0;display:grid;gap:0;max-height:313px;overflow:auto;scrollbar-color:var(--line2) transparent;scrollbar-width:thin}
+    .log-entry{display:grid;grid-template-columns:34px minmax(0,1fr) auto;gap:11px;align-items:start;padding:12px 0;border-bottom:1px solid var(--line)}
+    .log-entry:first-child{padding-top:0}.log-entry:last-child{border-bottom:none;padding-bottom:0}
+    .event-icon{width:32px;height:32px;border-radius:10px;display:grid;place-items:center;background:var(--surface);color:var(--accent)}
+    .event-icon.good{color:var(--good);background:rgba(71,215,170,.09)}.event-icon.bad{color:var(--bad);background:rgba(255,113,141,.09)}
+    .event-icon .icon{width:16px;height:16px}
+    .event-title{font-size:12px;font-weight:700;margin:1px 0 3px}.event-desc{color:var(--soft);font-size:10.5px;line-height:1.55}
+    .event-time{font-size:10px;color:var(--soft);white-space:nowrap;margin-top:3px;font-variant-numeric:tabular-nums}
+    .log-empty{color:var(--muted);font-size:12px;padding:30px 0;text-align:center}
+    .form-label{color:var(--muted);font-size:11px;font-weight:750;display:block;margin:15px 0 8px}
+    .field{display:flex;align-items:center;gap:10px;background:var(--input);border:1px solid var(--line2);padding:0 12px;border-radius:11px}
+    .field:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px var(--accentGlow)}
+    .field .icon{width:15px;height:15px;color:var(--soft)}
+    .field input{border:0;outline:0;width:100%;min-width:0;display:block;min-height:45px;color:var(--text);background:transparent;font-size:12px}
+    .field input:focus-visible{outline:none}
+    .config-actions{display:flex;align-items:center;gap:9px;margin-top:13px;flex-wrap:wrap}
+    .config-actions .btn{min-height:38px}
+    .helper{font-size:11px;color:var(--soft);line-height:1.7;margin:12px 0 0}
+    .helper a{color:var(--accent)}.helper a:hover{text-decoration:underline}
+    .config-message{min-height:16px;font-size:10.5px;color:var(--good);margin:9px 0 0}
+    .notice{padding:17px 19px;display:flex;align-items:flex-start;gap:12px;margin-top:17px;background:linear-gradient(110deg,rgba(246,184,105,.045),var(--card))}
+    .notice-icon{height:33px;width:33px;border-radius:10px;display:grid;place-items:center;background:rgba(246,184,105,.1);color:var(--amber);flex-shrink:0}
+    .notice strong{font-size:12px;display:block;margin-bottom:3px}.notice p{font-size:11px;color:var(--muted);line-height:1.8;margin:0}
+    .footer{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-top:24px;padding:0 2px;color:var(--soft);font-size:10.5px}
+    .footer a{color:var(--muted)}.footer a:hover{color:var(--accent)}
+    .toast{position:fixed;z-index:30;right:23px;bottom:23px;background:var(--card2);color:var(--text);border:1px solid var(--line2);box-shadow:var(--shadow);border-radius:12px;padding:12px 16px;font-size:12px;max-width:min(370px,calc(100vw - 32px));transform:translateY(12px);opacity:0;pointer-events:none;transition:.25s;display:flex;align-items:center;gap:9px}
+    .toast.show{opacity:1;transform:translateY(0)}.toast .icon{color:var(--good)}
+    @keyframes rotate{to{transform:rotate(360deg)}}
+    @media(max-width:1150px){.app{grid-template-columns:208px minmax(0,1fr)}.main-content{padding:0 24px 28px}.hero{grid-template-columns:minmax(0,1fr) 220px}.orbit:nth-child(1){width:194px;height:194px}.orbit:nth-child(2){width:156px;height:156px}.orbit:nth-child(3){width:104px;height:104px}.metrics{gap:10px}.metric{padding:17px 14px}.grid-main{grid-template-columns:minmax(0,1.1fr) minmax(290px,.9fr)}}
+    @media(max-width:900px){.sidebar{height:auto;position:relative;flex-direction:row;align-items:center;justify-content:space-between;padding:16px 24px;border-right:0;border-bottom:1px solid var(--line)}.app{display:block}.sidebar .brand{padding:0}.nav,.nav-title,.side-bottom{display:none}.sidebar .brand-mark{width:37px;height:37px}.main-content{max-width:900px;padding:0 20px 25px}.topbar{height:62px}.hero{grid-template-columns:minmax(0,1fr) 230px}.metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.grid-main,.bottom-grid{grid-template-columns:1fr}.page-heading{padding-top:27px}.section{padding:21px}}
+    @media(max-width:600px){.sidebar{padding:13px 16px}.sidebar .brand-name{font-size:16px}.main-content{padding:0 13px 25px}.topbar{height:53px}.crumbs{font-size:11px}.top-clock{display:none}.top-actions{gap:8px}.icon-button{width:35px;height:35px}.page-heading{padding:24px 3px 19px}.page-heading h1{font-size:30px}.header-pill{display:none}.lead{font-size:12px}.hero{grid-template-columns:1fr;padding:22px 19px 19px;min-height:0}.hero-state{font-size:27px}.hero-desc{font-size:12px}.hero-actions{margin-top:18px}.hero-actions .btn{flex:1;padding:0 9px}.orbital{height:118px;grid-row:1;opacity:.72}.orbit:nth-child(1){width:124px;height:124px}.orbit:nth-child(2){width:95px;height:95px}.orbit:nth-child(3){width:73px;height:73px}.core{width:45px;height:45px;border-radius:14px}.core svg{width:24px;height:24px}.hero-meta{margin-top:15px;gap:12px;font-size:10px}.metrics{gap:9px;margin-top:11px}.metric{padding:14px}.metric-top{font-size:10.5px}.metric-icon{width:28px;height:28px}.metric-value{font-size:26px}.grid-main,.bottom-grid{margin-top:11px;gap:11px}.section{padding:18px 17px}.chart-wrap{min-height:195px}.chart-wrap svg{height:182px!important}.notice{padding:14px}.footer{justify-content:center;text-align:center}.topbar .crumbs svg:first-child{display:none}}
+    @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
   </style>
 </head>
 <body>
-  <div class="page">
-    <header>
-      <div class="brand"><div class="logo" aria-hidden="true">↗</div><span>ÜiirmeHub <span style="color:#97a9c8;font-weight:400">/ Monitor</span></span></div>
-      <span class="tag">GitHub Pages • HTML</span>
-    </header>
-    <main>
-      <h1>Мониторинг <span class="accent">Render</span></h1>
-      <p class="intro">Эта страница отправляет GET-запрос на твой сервер каждые <strong>30 секунд</strong>. Никакие логины, пароли или данные учеников не передаются.</p>
-      <section class="panel main-panel" aria-labelledby="status-title">
-        <div class="status-row">
-          <div>
-            <div id="status-title" class="status-label">Монитор</div>
-            <div class="status" aria-live="polite"><span id="statusDot" class="dot"></span><span id="statusText">Запуск...</span></div>
-          </div>
-          <div class="clock"><small>Следующий запрос через</small><strong id="countdown">30 с</strong></div>
+  <!-- Inline SVG icons: no CDNs, third-party fonts, analytics, or scripts. -->
+  <svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
+    <symbol id="i-pulse" viewBox="0 0 24 24"><path d="M2 12h5l3-7 4 14 3-7h5"/></symbol>
+    <symbol id="i-layout" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="8" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="15" width="7" height="6" rx="1"/></symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24"><path d="M3 3v18h18M7 15l4-5 3 2 5-7"/></symbol>
+    <symbol id="i-history" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l4 2"/></symbol>
+    <symbol id="i-settings" viewBox="0 0 24 24"><path d="M4 7h16M4 17h16"/><circle cx="9" cy="7" r="3" fill="var(--card)"/><circle cx="16" cy="17" r="3" fill="var(--card)"/></symbol>
+    <symbol id="i-external" viewBox="0 0 24 24"><path d="M13 5h6v6M19 5l-9 9M19 13v5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h5"/></symbol>
+    <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol>
+    <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.2A8 8 0 0 1 9.8 4a8.5 8.5 0 1 0 10.2 10.2Z"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5.5 19 12 8 18.5z"/></symbol>
+    <symbol id="i-pause" viewBox="0 0 24 24"><path d="M8 5v14M16 5v14"/></symbol>
+    <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 11a8 8 0 0 0-14.7-3M4 4v5h5m-5 4a8 8 0 0 0 14.7 3M20 20v-5h-5"/></symbol>
+    <symbol id="i-send" viewBox="0 0 24 24"><path d="m22 2-7 20-4-9-9-4 20-7ZM22 2 11 13"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v6m0 4h.01"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+    <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7 .4l3-3a5 5 0 1 0-7-7l-1.7 1.7M14 11a5 5 0 0 0-7-.4l-3 3a5 5 0 1 0 7 7l1.7-1.7"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12m-4-4 4 4 4-4M4 17v3h16v-3"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M10 7V4h4v3m-8 0 1 13h10l1-13M10 11v5m4-5v5"/></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6m0-10h.01"/></symbol>
+    <symbol id="i-server" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="8" rx="2"/><rect x="3" y="13" width="18" height="8" rx="2"/><path d="M7 7h.01M7 17h.01M12 7h6M12 17h6"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="m12 2 9 4v6c0 5-3.6 8.4-9 10-5.4-1.6-9-5-9-10V6l9-4Z"/><path d="m9 12 2 2 4-4"/></symbol>
+  </svg>
+  <div class="app">
+    <aside class="sidebar">
+      <a class="brand" href="#overview" aria-label="ÜiirmeHub Pulse — главная">
+        <span class="brand-mark"><svg class="icon"><use href="#i-pulse"/></svg></span>
+        <span><span class="brand-name">ÜiirmeHub</span><span class="brand-sub">PULSE MONITOR</span></span>
+      </a>
+      <div class="nav-title">РАБОЧЕЕ ПРОСТРАНСТВО</div>
+      <nav class="nav" aria-label="Навигация">
+        <a href="#overview" class="active"><svg class="icon"><use href="#i-layout"/></svg>Обзор<svg class="icon chev"><use href="#i-chart"/></svg></a>
+        <a href="#analytics"><svg class="icon"><use href="#i-chart"/></svg>Аналитика</a>
+        <a href="#events"><svg class="icon"><use href="#i-history"/></svg>Журнал событий</a>
+        <a href="#settings"><svg class="icon"><use href="#i-settings"/></svg>Настройки</a>
+        <a id="sideServerLink" href="https://clubium-render.onrender.com/" target="_blank" rel="noopener noreferrer"><svg class="icon"><use href="#i-external"/></svg>Открыть сайт</a>
+      </nav>
+      <div class="side-bottom">
+        <div class="side-status">
+          <div class="side-status-head"><span>Режим мониторинга</span><span id="sideDot" class="mini-dot wait"></span></div>
+          <p id="sideState">Подготовка к первому запросу...</p>
         </div>
-        <div class="progress" aria-hidden="true"><div id="progressBar" class="progress-fill"></div></div>
-        <div class="stats">
-          <div class="stat"><div class="stat-name">Всего попыток</div><div id="sentCount" class="stat-value">0</div></div>
-          <div class="stat"><div class="stat-name">Ответ на запрос</div><div id="lastResult" class="stat-value" style="font-size:16px">—</div></div>
-          <div class="stat"><div class="stat-name">Последняя проверка</div><div id="lastTime" class="stat-value" style="font-size:17px">—</div></div>
-        </div>
-        <div class="controls">
-          <button id="toggleBtn" class="primary" type="button">Остановить монитор</button>
-          <button id="pingBtn" class="secondary" type="button">Отправить запрос сейчас</button>
-        </div>
-      </section>
-      <div class="grid">
-        <section class="panel subpanel">
-          <h2 class="section-heading">Адрес сервера</h2>
-          <form id="urlForm">
-            <label for="renderUrl">HTTPS-адрес Render (или публичного /health)</label>
-            <div class="input-row"><input id="renderUrl" name="renderUrl" type="url" placeholder="https://example.onrender.com/" required autocomplete="url" spellcheck="false"><button class="secondary" type="submit">Сохранить</button></div>
-          </form>
-          <p class="hint">По умолчанию указан адрес Clubium. Если он изменился, вставь новый — настройки сохраняются в этом браузере.</p>
-          <p class="hint" id="validationMessage" role="status"></p>
-        </section>
-        <section class="panel subpanel">
-          <h2 class="section-heading">Журнал запросов</h2>
-          <ul id="eventLog" class="log" aria-live="polite"><li><span>Подготовка к первой проверке...</span></li></ul>
-        </section>
+        <div class="version">ÜiirmeHub Pulse · v2.0<br>Создано для GitHub Pages</div>
       </div>
-      <div class="warning"><strong>Важно:</strong> GitHub Pages не запускает JavaScript на сервере. Запросы идут только пока эта страница открыта и браузер не приостановил вкладку. Для настоящей работы 24/7 нужен внешний планировщик или платный Render. Из-за защиты браузера (CORS) страница может подтвердить отправку запроса, но не всегда может определить HTTP-статус Render. И даже регулярные запросы не защищают бесплатный сервер от перезапуска или ограничения по часам.</div>
-    </main>
-    <p class="footer">ÜiirmeHub Server Monitor · Интервал 30 секунд · <a href="https://render.com/docs/free" target="_blank" rel="noopener noreferrer">Ограничения бесплатного Render</a></p>
+    </aside>
+    <div class="main">
+      <div class="main-content">
+        <header class="topbar">
+          <div class="crumbs"><svg class="icon"><use href="#i-layout"/></svg> Мониторинг <span style="opacity:.45">/</span> <strong>Панель управления</strong></div>
+          <div class="top-actions"><div class="top-clock"><span id="currentDate">—</span><strong id="currentClock">—</strong></div><button class="icon-button" type="button" id="themeBtn" title="Переключить тему" aria-label="Переключить тёмную и светлую тему"><svg class="icon" id="themeIcon"><use href="#i-sun"/></svg></button></div>
+        </header>
+        <main id="overview">
+          <div class="page-heading"><div><div class="eyebrow">SYSTEM OBSERVABILITY</div><h1>Твой сервер. Под контролем.</h1><p class="lead">Элегантный монитор Render: запрос каждые <strong style="color:var(--text)">30 секунд</strong>, история событий, график времени запроса и управление в один клик.</p></div><div class="header-pill"><span class="mini-dot" id="headerDot"></span><span id="headerState">Монитор запускается</span></div></div>
+          <section class="panel hero" aria-labelledby="heroStateText">
+            <div class="hero-main"><div class="hero-label">ТЕКУЩЕЕ СОСТОЯНИЕ</div><div class="hero-state"><span class="status-orb" id="statusOrb"></span><span id="heroStateText" aria-live="polite">Запуск проверки...</span></div><p class="hero-desc" id="heroDescription">Подключаемся к Render. Результат сетевого запроса не равен проверке HTTP-статуса.</p>
+              <div class="hero-actions"><button class="btn btn-primary" type="button" id="toggleBtn"><svg class="icon"><use href="#i-pause"/></svg><span>Остановить</span></button><button class="btn btn-dark" type="button" id="pingBtn"><svg class="icon"><use href="#i-refresh"/></svg><span>Проверить сейчас</span></button></div>
+              <div class="hero-meta"><span><svg class="icon"><use href="#i-clock"/></svg> Интервал 30 сек</span><span><svg class="icon"><use href="#i-shield"/></svg> Без персональных данных</span></div>
+            </div>
+            <div class="orbital" aria-hidden="true"><span class="orbit"></span><span class="orbit"></span><span class="orbit"></span><span class="core"><svg class="icon"><use href="#i-pulse"/></svg></span></div>
+          </section>
+          <section class="metrics" aria-label="Статистика запросов">
+            <div class="panel metric"><div class="metric-top"><span>Всего запросов</span><span class="metric-icon"><svg class="icon"><use href="#i-send"/></svg></span></div><div id="totalCount" class="metric-value">0</div><div class="metric-sub">в этом браузере</div></div>
+            <div class="panel metric" data-tone="green"><div class="metric-top"><span>Ответ сети*</span><span class="metric-icon"><svg class="icon"><use href="#i-check"/></svg></span></div><div id="replyCount" class="metric-value">0</div><div class="metric-sub">HTTP-статус неизвестен</div></div>
+            <div class="panel metric" data-tone="red"><div class="metric-top"><span>Ошибки соединения</span><span class="metric-icon"><svg class="icon"><use href="#i-alert"/></svg></span></div><div id="errorCount" class="metric-value">0</div><div class="metric-sub">включая тайм-ауты</div></div>
+            <div class="panel metric" data-tone="cyan"><div class="metric-top"><span>Последняя проверка</span><span class="metric-icon"><svg class="icon"><use href="#i-clock"/></svg></span></div><div id="lastCheck" class="metric-value" style="font-size:clamp(21px,2.25vw,28px)">—</div><div class="metric-sub">местное время</div></div>
+          </section>
+          <div class="grid-main">
+            <section class="panel section" id="analytics" aria-labelledby="analyticsTitle"><div class="section-head"><div><h2 class="section-title" id="analyticsTitle">Время выполнения запросов</h2><p class="section-note">Последние 30 попыток · измеряется в браузере</p></div><span class="small-tag">LIVE CHART</span></div><div class="chart-wrap"><svg id="trendChart" role="img" aria-label="График времени выполнения запросов" viewBox="0 0 650 215" preserveAspectRatio="none"></svg><div class="chart-empty" id="chartEmpty"><svg class="icon"><use href="#i-chart"/></svg><strong>Собираем статистику</strong><span>График появится после первых запросов</span></div></div><div class="chart-footer"><span class="legend"><i></i>Время запроса, мс</span><span id="chartCaption">Нет данных</span></div></section>
+            <section class="panel section" aria-labelledby="cycleTitle"><div class="section-head"><div><h2 class="section-title" id="cycleTitle">Цикл мониторинга</h2><p class="section-note">Автоматические проверки каждые 30 секунд</p></div><span class="small-tag" id="cycleBadge">АКТИВЕН</span></div><div class="details"><div class="detail"><span class="key">Следующий запрос</span><span class="value" id="countdown">—</span></div><div class="detail"><span class="key">Последний результат</span><span class="value" id="lastResult">—</span></div><div class="detail"><span class="key">Длительность</span><span class="value" id="lastDuration">—</span></div><div class="detail"><span class="key">Точка проверки</span><span class="value" id="serverHost">—</span></div></div><div class="cycle-track" role="progressbar" aria-label="Прогресс до следующей проверки" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="progressWrap"><div id="cycleProgress" class="cycle-progress"></div></div><div class="cycle-label"><span id="cycleHint">Новый запрос выполняется автоматически</span><span>30 с</span></div></section>
+          </div>
+          <div class="bottom-grid">
+            <section class="panel section" id="events" aria-labelledby="eventsTitle"><div class="section-head"><div><h2 class="section-title" id="eventsTitle">Последние события</h2><p class="section-note">История автоматически сохраняется в браузере</p></div><button class="btn btn-muted" type="button" id="exportBtn" title="Скачать журнал CSV"><svg class="icon"><use href="#i-download"/></svg> CSV</button></div><ul class="log-list" id="eventList"><li class="log-empty">Событий пока нет</li></ul></section>
+            <section class="panel section" id="settings" aria-labelledby="settingsTitle"><div class="section-head"><div><h2 class="section-title" id="settingsTitle">Настройки сервера</h2><p class="section-note">Адрес хранится только в твоём браузере</p></div><span class="small-tag">CONFIG</span></div>
+              <form id="serverForm"><label for="serverUrl" class="form-label">HTTPS-адрес Render или публичного /health</label><div class="field"><svg class="icon"><use href="#i-link"/></svg><input id="serverUrl" name="serverUrl" type="url" placeholder="https://clubium-render.onrender.com/" required autocomplete="url" spellcheck="false" inputmode="url"></div><div class="config-actions"><button class="btn btn-primary" type="submit">Сохранить URL</button><button class="btn btn-muted" type="button" id="copyBtn"><svg class="icon"><use href="#i-copy"/></svg> Копировать</button><button class="btn btn-muted" type="button" id="clearBtn" title="Очистить журнал и статистику"><svg class="icon"><use href="#i-trash"/></svg></button></div><p class="config-message" id="configMessage" role="status"></p></form>
+              <p class="helper">Используется обычный <strong>GET-запрос</strong> без авторизации, cookies и данных учащихся. Если у тебя есть публичный маршрут <code>/health</code>, его лучше использовать вместо главной страницы.</p>
+            </section>
+          </div>
+          <aside class="panel notice" aria-label="Ограничения мониторинга"><span class="notice-icon"><svg class="icon"><use href="#i-info"/></svg></span><div><strong>Важные особенности</strong><p><b>*</b> Запросы выполняются в режиме <code>no-cors</code>: браузер может показать сетевой ответ, но <strong>не может проверить HTTP-статус или содержимое ответа</strong>. Это не подтверждение работоспособности приложения. На GitHub Pages запросы идут <strong>только пока вкладка открыта и браузер не приостановил её</strong>. Для круглосуточной проверки потребуется внешний планировщик. Регулярные запросы не гарантируют, что бесплатный Render не будет перезапущен или ограничен.</p></div></aside>
+        </main>
+        <footer class="footer"><span>© ÜiirmeHub Pulse · Частный мониторинг без сторонней аналитики</span><span><a href="https://render.com/docs/free" target="_blank" rel="noopener noreferrer">Правила Render Free</a> · <a href="https://docs.github.com/en/pages" target="_blank" rel="noopener noreferrer">GitHub Pages</a></span></footer>
+      </div>
+    </div>
   </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"><svg class="icon"><use href="#i-check"/></svg><span id="toastText">Готово</span></div>
   <script>
-    (() => {
-      'use strict';
-      const INTERVAL = 30_000;
-      const REQUEST_TIMEOUT = 20_000;
-      const DEFAULT_URL = 'https://clubium-render.onrender.com/';
-      const $ = (id) => document.getElementById(id);
-      const els = {
-        statusText: $('statusText'), statusDot: $('statusDot'), countdown: $('countdown'),
-        progressBar: $('progressBar'), sentCount: $('sentCount'), lastResult: $('lastResult'),
-        lastTime: $('lastTime'), toggle: $('toggleBtn'), ping: $('pingBtn'),
-        url: $('renderUrl'), form: $('urlForm'), validation: $('validationMessage'), log: $('eventLog')
-      };
-      let url = localStorage.getItem('uiirmehub-monitor-target') || DEFAULT_URL;
-      let attempts = 0;
-      let active = true;
-      let pending = false;
-      let nextTickAt = Date.now() + INTERVAL;
-      let intervalId = null;
-      const timeFormat = new Intl.DateTimeFormat('ru-RU', {hour:'2-digit',minute:'2-digit',second:'2-digit'});
-      els.url.value = url;
-
-      function log(message, error = false) {
-        const li = document.createElement('li');
-        const time = document.createElement('time');
-        time.textContent = timeFormat.format(new Date());
-        const label = document.createElement('span');
-        label.className = error ? 'bad' : 'info';
-        label.textContent = message;
-        li.append(time, label);
-        if (els.log.firstElementChild?.textContent === 'Подготовка к первой проверке...') els.log.replaceChildren();
-        els.log.prepend(li);
-        while (els.log.children.length > 8) els.log.lastElementChild.remove();
+  (() => {
+    'use strict';
+    const INTERVAL = 30_000;
+    const TIMEOUT = 20_000;
+    const DEFAULT_URL = 'https://clubium-render.onrender.com/';
+    const K_URL = 'uiirmehub-pulse-url-v2';
+    const K_DATA = 'uiirmehub-pulse-history-v2';
+    const K_THEME = 'uiirmehub-pulse-theme-v2';
+    const $ = id => document.getElementById(id);
+    const fmtTime = d => new Date(d).toLocaleTimeString('ru-RU', {hour:'2-digit',minute:'2-digit',second:'2-digit'});
+    const fmtInt = n => n.toLocaleString('ru-RU');
+    const safeRead = (key, fallback) => { try { return localStorage.getItem(key) ?? fallback; } catch { return fallback; } };
+    const safeWrite = (key, value) => { try { localStorage.setItem(key, value); } catch {} };
+    const icon = name => `<svg class="icon"><use href="#i-${name}"/></svg>`;
+    const E = (tag, cls, text) => { const el = document.createElement(tag); if (cls) el.className = cls; if (text !== undefined) el.textContent = text; return el; };
+    function parseURL(str) {
+      const u = new URL(str.trim());
+      if (u.protocol !== 'https:' || u.username || u.password || u.search || u.hash) throw new Error('Нужен HTTPS-адрес без пароля, параметров и #якоря.');
+      return u.href;
+    }
+    let url = DEFAULT_URL;
+    try { url = parseURL(safeRead(K_URL, DEFAULT_URL)); } catch {}
+    let stored;
+    try { stored = JSON.parse(safeRead(K_DATA, 'null')); } catch { stored = null; }
+    const data = {
+      total: Number.isSafeInteger(stored?.total) && stored.total >= 0 ? stored.total : 0,
+      success: Number.isSafeInteger(stored?.success) && stored.success >= 0 ? stored.success : 0,
+      error: Number.isSafeInteger(stored?.error) && stored.error >= 0 ? stored.error : 0,
+      history: Array.isArray(stored?.history) ? stored.history.filter(x => Number.isFinite(x?.duration) && Number.isFinite(x?.time) && ['ok','fail'].includes(x.status)).slice(-120) : [],
+      events: Array.isArray(stored?.events) ? stored.events.filter(x => typeof x?.title === 'string' && Number.isFinite(x?.time) && typeof x?.desc === 'string' && ['ok','fail','neutral'].includes(x.type)).slice(0,80) : []
+    };
+    let active = true, inFlight = false, nextAt = 0, timerId = 0, latest = null, toastTimer = 0;
+    const $toggle = $('toggleBtn'), $ping = $('pingBtn');
+    $('serverUrl').value = url;
+    $('serverHost').textContent = new URL(url).host;
+    $('sideServerLink').href = url;
+    const theme = safeRead(K_THEME, 'dark') === 'light' ? 'light' : 'dark';
+    document.documentElement.dataset.theme = theme;
+    function renderTheme() { $('themeIcon').querySelector('use').setAttribute('href', document.documentElement.dataset.theme === 'dark' ? '#i-sun' : '#i-moon'); }
+    renderTheme();
+    $('themeBtn').addEventListener('click', () => { const newTheme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'; document.documentElement.dataset.theme = newTheme; safeWrite(K_THEME, newTheme); renderTheme(); });
+    function persist() { safeWrite(K_DATA, JSON.stringify(data)); }
+    function toast(message) { $('toastText').textContent = message; $('toast').classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => $('toast').classList.remove('show'), 3100); }
+    function addEvent(title, desc, type='neutral') {
+      data.events.unshift({title,desc,type,time:Date.now()}); data.events = data.events.slice(0,80);
+      persist(); renderEvents();
+    }
+    function renderEvents() {
+      const list = $('eventList'); list.replaceChildren();
+      if (!data.events.length) { list.append(E('li','log-empty','Событий пока нет')); return; }
+      for (const event of data.events.slice(0,9)) {
+        const li = E('li','log-entry');
+        const badge = E('span','event-icon' + (event.type === 'ok' ? ' good' : event.type === 'fail' ? ' bad' : ''));
+        badge.innerHTML = icon(event.type === 'ok' ? 'check' : event.type === 'fail' ? 'alert' : 'history');
+        const contents = E('div'); contents.append(E('div','event-title',event.title),E('div','event-desc',event.desc));
+        li.append(badge,contents,E('time','event-time',fmtTime(event.time))); list.append(li);
       }
-      function status(text, state='') {
-        els.statusText.textContent = text;
-        els.statusDot.className = 'dot' + (state ? ' ' + state : '');
+    }
+    function renderMetrics() {
+      $('totalCount').textContent = fmtInt(data.total);
+      $('replyCount').textContent = fmtInt(data.success);
+      $('errorCount').textContent = fmtInt(data.error);
+      const last = data.history.at(-1);
+      $('lastCheck').textContent = last ? fmtTime(last.time) : '—';
+      $('lastResult').textContent = last ? last.status === 'ok' ? 'Ответ сети*' : 'Ошибка' : '—';
+      $('lastResult').style.color = last ? (last.status === 'ok' ? 'var(--good)' : 'var(--bad)') : 'var(--text)';
+      $('lastDuration').textContent = last ? Math.round(last.duration) + ' мс' : '—';
+    }
+    const NS='http://www.w3.org/2000/svg';
+    function svg(tag, attrs={}) { const el=document.createElementNS(NS,tag); for (const [k,v] of Object.entries(attrs)) el.setAttribute(k,String(v)); return el; }
+    function renderChart() {
+      const chart=$('trendChart'); chart.replaceChildren();
+      const pts=data.history.slice(-30); $('chartEmpty').hidden = pts.length>0;
+      // display:none needed because chart-empty has flex display
+      $('chartEmpty').style.display=pts.length ? 'none' : 'flex';
+      if (!pts.length) { $('chartCaption').textContent='Нет данных'; return; }
+      const left=28,right=634,top=17,bottom=190;
+      const max=Math.max(250,...pts.map(p => p.duration));
+      const ceiling=Math.ceil(max/250)*250;
+      const defs=svg('defs'); const grad=svg('linearGradient',{id:'pulseFill',x1:0,y1:0,x2:0,y2:1}); grad.append(svg('stop',{offset:'0%','stop-color':'#8a7aff','stop-opacity':'.29'}),svg('stop',{offset:'100%','stop-color':'#8a7aff','stop-opacity':'0'})); defs.append(grad); chart.append(defs);
+      for(let i=0;i<=4;i++) {
+        const y=top+(bottom-top)*i/4;
+        chart.append(svg('line',{x1:left,y1:y,x2:right,y2:y,stroke:'var(--line2)','stroke-dasharray':'3 5','stroke-width':'1'}));
+        const label=svg('text',{x:left-7,y:y+4,fill:'var(--soft)','font-size':10,'text-anchor':'end'}); label.textContent=String(Math.round(ceiling*(1-i/4))); chart.append(label);
       }
-      function refreshCountdown() {
-        if (!active) { els.countdown.textContent = 'Пауза'; els.progressBar.style.width = '0%'; return; }
-        const remaining = Math.max(0, nextTickAt - Date.now());
-        els.countdown.textContent = Math.ceil(remaining / 1000) + ' с';
-        els.progressBar.style.width = (100 * (1 - Math.min(INTERVAL, remaining) / INTERVAL)).toFixed(1) + '%';
+      const xy=pts.map((p,i)=>[left+(right-left)*(pts.length===1 ? .5 : i/(pts.length-1)), bottom-(p.duration/ceiling)*(bottom-top)]);
+      const d=xy.map(([x,y],i)=>(i?'L':'M')+x.toFixed(2)+' '+y.toFixed(2)).join(' ');
+      chart.append(svg('path',{d:d+` L ${xy.at(-1)[0]} ${bottom} L ${xy[0][0]} ${bottom} Z`,fill:'url(#pulseFill)'}));
+      chart.append(svg('path',{d,stroke:'#887dff','stroke-width':3,fill:'none','stroke-linecap':'round','stroke-linejoin':'round'}));
+      const [x,y]=xy.at(-1);
+      chart.append(svg('circle',{cx:x,cy:y,r:6,fill:'#887dff','fill-opacity':'.20'}));
+      chart.append(svg('circle',{cx:x,cy:y,r:3.4,fill:'#8e80ff',stroke:'var(--card)','stroke-width':1}));
+      const firstLabel=svg('text',{x:left,y:209,fill:'var(--soft)','font-size':10}); firstLabel.textContent=fmtTime(pts[0].time); chart.append(firstLabel);
+      const lastLabel=svg('text',{x:right,y:209,fill:'var(--soft)','font-size':10,'text-anchor':'end'}); lastLabel.textContent=fmtTime(pts.at(-1).time); chart.append(lastLabel);
+      $('chartCaption').textContent='Показано: '+pts.length+' из '+data.history.length;
+    }
+    function setState(state) {
+      const orb=$('statusOrb'); orb.className='status-orb';
+      const small=$('sideDot'); small.className='mini-dot';
+      $('headerDot').className='mini-dot';
+      if(state==='paused') {
+        $('heroStateText').textContent='Монитор на паузе';
+        $('heroDescription').textContent='Периодические запросы остановлены. Можно запустить их снова.';
+        orb.classList.add('is-off'); small.classList.add('off'); $('headerDot').classList.add('off');
+        $('headerState').textContent='Монитор остановлен'; $('sideState').textContent='Автоматические запросы приостановлены';
+      } else if(state==='checking') {
+        $('heroStateText').textContent='Проверяем соединение';
+        $('heroDescription').textContent='Отправляется GET-запрос без cookies, авторизации и данных учащихся.';
+        $('headerState').textContent='Выполняется запрос'; $('sideState').textContent='Идёт проверка подключения к серверу';
+        orb.classList.add('is-good');
+      } else if(state==='ok') {
+        $('heroStateText').textContent='Ответ сети получен*';
+        $('heroDescription').textContent='Сетевой запрос завершился. HTTP-статус скрыт режимом no-cors — состояние приложения не подтверждено.';
+        $('headerState').textContent='Проверки запущены'; $('sideState').textContent='Запрос каждые 30 секунд · HTTP-статус скрыт';
+        orb.classList.add('is-good');
+      } else if(state==='fail') {
+        $('heroStateText').textContent='Ошибка соединения';
+        $('heroDescription').textContent='Последний запрос завершился ошибкой или тайм-аутом. Следующая проверка пройдёт по расписанию.';
+        $('headerState').textContent='Ошибка последней попытки'; $('sideState').textContent='Есть ошибка сети; повторы продолжаются';
+        small.classList.add('wait'); $('headerDot').classList.add('wait'); orb.classList.add('is-bad');
       }
-      async function ping() {
-        if (pending) { log('Предыдущий запрос ещё выполняется'); return; }
-        pending = true;
-        els.ping.disabled = true;
-        attempts += 1;
-        els.sentCount.textContent = attempts.toLocaleString('ru-RU');
-        els.lastTime.textContent = timeFormat.format(new Date());
-        els.lastResult.textContent = 'Ожидание...';
-        status('Отправка запроса...', 'active');
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT);
-        const started = performance.now();
-        try {
-          // no-cors allows a simple cross-origin GET without requiring a CORS-enabled API.
-          // The returned response is opaque: its HTTP status/body cannot be checked.
-          await fetch(url, {method:'GET', mode:'no-cors', credentials:'omit', cache:'no-store', redirect:'follow', signal:controller.signal});
-          const elapsed = Math.round(performance.now() - started);
-          els.lastResult.textContent = 'Получен*';
-          if (active) status('Запрос выполнен*', 'active');
-          log('Запрос завершён за ' + elapsed + ' мс (статус HTTP не проверен)');
-        } catch(err) {
-          const timedOut = err && err.name === 'AbortError';
-          els.lastResult.textContent = timedOut ? 'Тайм-аут' : 'Ошибка сети';
-          if (active) status('Не удалось проверить', 'error');
-          log(timedOut ? 'Тайм-аут запроса (20 секунд)' : 'Сетевая ошибка или блокировка браузером', true);
-        } finally {
-          clearTimeout(timeout);
-          pending = false;
-          els.ping.disabled = false;
-          if (!active) status('Монитор остановлен');
-        }
+      if (!active) {
+        $('cycleBadge').textContent='ПАУЗА';
+        $toggle.querySelector('span').textContent='Запустить';
+        $toggle.querySelector('use').setAttribute('href','#i-play');
+      } else {
+        $('cycleBadge').textContent='АКТИВЕН';
+        $toggle.querySelector('span').textContent='Остановить';
+        $toggle.querySelector('use').setAttribute('href','#i-pause');
       }
-      function stop() {
-        active = false;
-        clearInterval(intervalId);
-        intervalId = null;
-        els.toggle.textContent = 'Запустить монитор';
-        status('Монитор остановлен');
-        refreshCountdown();
-        log('Монитор поставлен на паузу');
+    }
+    function countdown() {
+      if(!active) {
+        $('countdown').textContent='Пауза'; $('cycleProgress').style.width='0%'; $('progressWrap').setAttribute('aria-valuenow','0'); $('cycleHint').textContent='Автоматические проверки отключены'; return;
       }
-      function start() {
-        active = true;
-        if (intervalId !== null) clearInterval(intervalId);
-        intervalId = setInterval(() => {
-          nextTickAt = Date.now() + INTERVAL;
-          refreshCountdown();
-          ping();
-        }, INTERVAL);
-        nextTickAt = Date.now() + INTERVAL;
-        els.toggle.textContent = 'Остановить монитор';
-        log('Монитор запущен (каждые 30 секунд)');
-        refreshCountdown();
-        ping();
-      }
-      els.toggle.addEventListener('click', () => active ? stop() : start());
-      els.ping.addEventListener('click', ping);
-      els.form.addEventListener('submit', event => {
-        event.preventDefault();
-        let parsed;
-        try { parsed = new URL(els.url.value.trim()); }
-        catch { els.validation.textContent = 'Введите корректный HTTPS-адрес.'; return; }
-        if (parsed.protocol !== 'https:' || parsed.username || parsed.password) {
-          els.validation.textContent = 'Нужен HTTPS-адрес без логина и пароля.';
-          return;
-        }
-        url = parsed.toString();
-        localStorage.setItem('uiirmehub-monitor-target', url);
-        els.validation.textContent = 'Адрес сохранён. Следующие запросы пойдут на него.';
-        log('Адрес сервера обновлён');
-        if (active) ping();
-      });
-      document.addEventListener('visibilitychange', () => {
-        if (!document.hidden && active) {
-          // Some browsers throttle or suspend JavaScript in background tabs.
-          // Reset the countdown when the user returns; do not claim 24/7 operation.
-          clearInterval(intervalId);
-          intervalId = setInterval(() => {
-            nextTickAt = Date.now() + INTERVAL;
-            refreshCountdown();
-            ping();
-          }, INTERVAL);
-          nextTickAt = Date.now() + INTERVAL;
-          refreshCountdown();
-          log('Вкладка активна: расписание проверок восстановлено');
-          ping();
-        }
-      });
-      setInterval(refreshCountdown, 500);
-      start();
-    })();
+      const remaining=Math.max(0,nextAt-Date.now());
+      const percentage=Math.max(0,Math.min(100,100*(1-remaining/INTERVAL)));
+      $('countdown').textContent=Math.ceil(remaining/1000)+' сек';
+      $('cycleProgress').style.width=percentage.toFixed(1)+'%';
+      $('progressWrap').setAttribute('aria-valuenow',String(Math.round(percentage)));
+      $('cycleHint').textContent=inFlight?'Запрос выполняется...':'Новый запрос по расписанию';
+    }
+    async function ping(origin='manual') {
+      if(inFlight) { if(origin==='manual') toast('Предыдущий запрос ещё выполняется'); return; }
+      inFlight=true; $ping.disabled=true;
+      if(active) setState('checking');
+      data.total += 1; renderMetrics(); persist();
+      const started=performance.now(); const controller=new AbortController(); const to=setTimeout(()=>controller.abort(),TIMEOUT);
+      let state='ok', message='Сетевой ответ получен*';
+      try {
+        // Opaque response: do not claim HTTP 200, uptime, app health, or reliable server availability.
+        await fetch(url,{method:'GET',mode:'no-cors',credentials:'omit',redirect:'follow',cache:'no-store',signal:controller.signal});
+        data.success++;
+      } catch(e) {
+        data.error++; state='fail'; message=e?.name==='AbortError'?'Тайм-аут 20 сек':'Ошибка сети / блокировка';
+      } finally { clearTimeout(to); }
+      const duration=Math.round(performance.now()-started);
+      data.history.push({time:Date.now(),duration,status:state}); data.history=data.history.slice(-120);
+      addEvent(state==='ok'?'Запрос завершён*':'Не удалось выполнить запрос',message+' · '+duration+' мс · '+(origin==='auto'?'автоматически':'вручную'),state==='ok'?'ok':'fail');
+      latest=state; inFlight=false; $ping.disabled=false;
+      if(active) setState(state); else setState('paused');
+      renderMetrics();renderChart();countdown();persist();
+    }
+    function schedule() {
+      clearTimeout(timerId); if(!active)return;
+      nextAt=Date.now()+INTERVAL; countdown();
+      timerId=setTimeout(()=>{ if(!active)return; schedule(); ping('auto'); },INTERVAL);
+    }
+    function start() {
+      active=true; schedule(); setState('checking'); addEvent('Монитор запущен','Автоматические запросы раз в 30 секунд'); ping('auto');
+    }
+    function pause() {
+      active=false;clearTimeout(timerId);nextAt=0;setState('paused');countdown();addEvent('Монитор приостановлен','Автоматическая отправка запросов остановлена');
+    }
+    $toggle.addEventListener('click',()=>active?pause():start());
+    $ping.addEventListener('click',()=>ping('manual'));
+    $('serverForm').addEventListener('submit',e=>{
+      e.preventDefault();
+      try {
+        url=parseURL($('serverUrl').value);
+        safeWrite(K_URL,url);
+        $('serverUrl').value=url;
+        $('serverHost').textContent=new URL(url).host;
+        $('sideServerLink').href=url;
+        $('configMessage').style.color='var(--good)'; $('configMessage').textContent='Адрес сохранён. Новые запросы отправляются на него.';
+        addEvent('Адрес сервера обновлён',new URL(url).host);
+        toast('Новый адрес сервера сохранён');
+        if(active)ping('manual');
+      } catch(e) { $('configMessage').style.color='var(--bad)'; $('configMessage').textContent=e.message||'Введите корректный HTTPS-адрес'; }
+    });
+    $('copyBtn').addEventListener('click',async()=>{
+      try{ await navigator.clipboard.writeText(url);toast('Адрес скопирован'); }
+      catch { toast('Не удалось скопировать. Выделите адрес в поле.');$('serverUrl').focus();$('serverUrl').select(); }
+    });
+    $('clearBtn').addEventListener('click',()=>{
+      if(!window.confirm('Очистить статистику и весь журнал событий в этом браузере?'))return;
+      data.total=0;data.success=0;data.error=0;data.history=[];data.events=[];persist();renderMetrics();renderChart();renderEvents();toast('История очищена');
+    });
+    $('exportBtn').addEventListener('click',()=>{
+      if(!data.history.length){toast('Пока нет запросов для экспорта');return;}
+      const rows=[['Время','Состояние','Длительность (мс)'],...data.history.map(x=>[new Date(x.time).toISOString(),x.status==='ok'?'Сетевой ответ (HTTP не проверен)':'Ошибка',x.duration])];
+      const csv='\ufeff'+rows.map(row=>row.map(value=>'"'+String(value).replaceAll('"','""')+'"').join(';')).join('\r\n');
+      const blob=new Blob([csv],{type:'text/csv;charset=utf-8'}); const objectURL=URL.createObjectURL(blob);
+      const a=E('a');a.href=objectURL;a.download='uiirmehub-pulse-'+new Date().toISOString().slice(0,10)+'.csv';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(objectURL),1000);toast('Журнал экспортирован в CSV');
+    });
+    const dateClock=()=>{const now=new Date();$('currentDate').textContent=now.toLocaleDateString('ru-RU',{day:'numeric',month:'long',year:'numeric'});$('currentClock').textContent=fmtTime(now);countdown();};
+    setInterval(dateClock,500);
+    document.addEventListener('visibilitychange',()=>{
+      if(document.hidden || !active)return;
+      // Tabs can be throttled: one catch-up request, never a burst of missed requests.
+      if(Date.now()>=nextAt+1200){schedule();addEvent('Вкладка снова активна','Расписание восстановлено после фоновой паузы');ping('auto');}
+    });
+    document.querySelectorAll('.nav a[href^="#"]').forEach(a=>a.addEventListener('click',()=>{document.querySelectorAll('.nav a').forEach(item=>item.classList.remove('active'));a.classList.add('active');}));
+    renderMetrics(); renderEvents();renderChart();dateClock();start();
+  })();
   </script>
 </body>
 </html>
