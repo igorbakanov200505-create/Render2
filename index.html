@@ -218,7 +218,7 @@
           <div class="side-status-head"><span>Режим мониторинга</span><span id="sideDot" class="mini-dot wait"></span></div>
           <p id="sideState">Подготовка к первому запросу...</p>
         </div>
-        <div class="version">ÜiirmeHub Pulse · v2.0<br>Создано для GitHub Pages</div>
+        <div class="version">ÜiirmeHub Pulse · v3.0<br>Создано для GitHub Pages</div>
       </div>
     </aside>
     <div class="main">
@@ -228,254 +228,244 @@
           <div class="top-actions"><div class="top-clock"><span id="currentDate">—</span><strong id="currentClock">—</strong></div><button class="icon-button" type="button" id="themeBtn" title="Переключить тему" aria-label="Переключить тёмную и светлую тему"><svg class="icon" id="themeIcon"><use href="#i-sun"/></svg></button></div>
         </header>
         <main id="overview">
-          <div class="page-heading"><div><div class="eyebrow">SYSTEM OBSERVABILITY</div><h1>Твой сервер. Под контролем.</h1><p class="lead">Элегантный монитор Render: запрос каждые <strong style="color:var(--text)">30 секунд</strong>, история событий, график времени запроса и управление в один клик.</p></div><div class="header-pill"><span class="mini-dot" id="headerDot"></span><span id="headerState">Монитор запускается</span></div></div>
+          <div class="page-heading"><div><div class="eyebrow">SYSTEM OBSERVABILITY</div><h1>Твой сервер. Под контролем.</h1><p class="lead">Браузер обращается к Render каждые <strong style="color:var(--text)">30 секунд</strong>. GitHub Actions независимо проверяет HTTP-ответ и сохраняет историю в репозитории.</p></div><div class="header-pill"><span class="mini-dot" id="headerDot"></span><span id="headerState">Монитор запускается</span></div></div>
           <section class="panel hero" aria-labelledby="heroStateText">
-            <div class="hero-main"><div class="hero-label">ТЕКУЩЕЕ СОСТОЯНИЕ</div><div class="hero-state"><span class="status-orb" id="statusOrb"></span><span id="heroStateText" aria-live="polite">Запуск проверки...</span></div><p class="hero-desc" id="heroDescription">Подключаемся к Render. Результат сетевого запроса не равен проверке HTTP-статуса.</p>
+            <div class="hero-main"><div class="hero-label">ТЕКУЩЕЕ СОСТОЯНИЕ</div><div class="hero-state"><span class="status-orb" id="statusOrb"></span><span id="heroStateText" aria-live="polite">Запуск проверки...</span></div><p class="hero-desc" id="heroDescription">Загружаем подтверждённый HTTP-статус из GitHub Actions.</p>
               <div class="hero-actions"><button class="btn btn-primary" type="button" id="toggleBtn"><svg class="icon"><use href="#i-pause"/></svg><span>Остановить</span></button><button class="btn btn-dark" type="button" id="pingBtn"><svg class="icon"><use href="#i-refresh"/></svg><span>Проверить сейчас</span></button></div>
-              <div class="hero-meta"><span><svg class="icon"><use href="#i-clock"/></svg> Интервал 30 сек</span><span><svg class="icon"><use href="#i-shield"/></svg> Без персональных данных</span></div>
+              <div class="hero-meta"><span><svg class="icon"><use href="#i-clock"/></svg> Интервал 30 сек</span><span><svg class="icon"><use href="#i-shield"/></svg> Без персональных данных</span><span id="cloudFresh">GitHub: ожидаем</span></div>
             </div>
             <div class="orbital" aria-hidden="true"><span class="orbit"></span><span class="orbit"></span><span class="orbit"></span><span class="core"><svg class="icon"><use href="#i-pulse"/></svg></span></div>
           </section>
           <section class="metrics" aria-label="Статистика запросов">
-            <div class="panel metric"><div class="metric-top"><span>Всего запросов</span><span class="metric-icon"><svg class="icon"><use href="#i-send"/></svg></span></div><div id="totalCount" class="metric-value">0</div><div class="metric-sub">в этом браузере</div></div>
-            <div class="panel metric" data-tone="green"><div class="metric-top"><span>Ответ сети*</span><span class="metric-icon"><svg class="icon"><use href="#i-check"/></svg></span></div><div id="replyCount" class="metric-value">0</div><div class="metric-sub">HTTP-статус неизвестен</div></div>
-            <div class="panel metric" data-tone="red"><div class="metric-top"><span>Ошибки соединения</span><span class="metric-icon"><svg class="icon"><use href="#i-alert"/></svg></span></div><div id="errorCount" class="metric-value">0</div><div class="metric-sub">включая тайм-ауты</div></div>
+            <div class="panel metric"><div class="metric-top"><span>Облачных проверок</span><span class="metric-icon"><svg class="icon"><use href="#i-send"/></svg></span></div><div id="totalCount" class="metric-value">0</div><div class="metric-sub">история GitHub Actions</div></div>
+            <div class="panel metric" data-tone="green"><div class="metric-top"><span>Успешных HTTP</span><span class="metric-icon"><svg class="icon"><use href="#i-check"/></svg></span></div><div id="replyCount" class="metric-value">0</div><div class="metric-sub">проверены сервером GitHub</div></div>
+            <div class="panel metric" data-tone="red"><div class="metric-top"><span>Ошибки HTTP / сети</span><span class="metric-icon"><svg class="icon"><use href="#i-alert"/></svg></span></div><div id="errorCount" class="metric-value">0</div><div class="metric-sub">проверено GitHub Actions</div></div>
             <div class="panel metric" data-tone="cyan"><div class="metric-top"><span>Последняя проверка</span><span class="metric-icon"><svg class="icon"><use href="#i-clock"/></svg></span></div><div id="lastCheck" class="metric-value" style="font-size:clamp(21px,2.25vw,28px)">—</div><div class="metric-sub">местное время</div></div>
           </section>
           <div class="grid-main">
-            <section class="panel section" id="analytics" aria-labelledby="analyticsTitle"><div class="section-head"><div><h2 class="section-title" id="analyticsTitle">Время выполнения запросов</h2><p class="section-note">Последние 30 попыток · измеряется в браузере</p></div><span class="small-tag">LIVE CHART</span></div><div class="chart-wrap"><svg id="trendChart" role="img" aria-label="График времени выполнения запросов" viewBox="0 0 650 215" preserveAspectRatio="none"></svg><div class="chart-empty" id="chartEmpty"><svg class="icon"><use href="#i-chart"/></svg><strong>Собираем статистику</strong><span>График появится после первых запросов</span></div></div><div class="chart-footer"><span class="legend"><i></i>Время запроса, мс</span><span id="chartCaption">Нет данных</span></div></section>
-            <section class="panel section" aria-labelledby="cycleTitle"><div class="section-head"><div><h2 class="section-title" id="cycleTitle">Цикл мониторинга</h2><p class="section-note">Автоматические проверки каждые 30 секунд</p></div><span class="small-tag" id="cycleBadge">АКТИВЕН</span></div><div class="details"><div class="detail"><span class="key">Следующий запрос</span><span class="value" id="countdown">—</span></div><div class="detail"><span class="key">Последний результат</span><span class="value" id="lastResult">—</span></div><div class="detail"><span class="key">Длительность</span><span class="value" id="lastDuration">—</span></div><div class="detail"><span class="key">Точка проверки</span><span class="value" id="serverHost">—</span></div></div><div class="cycle-track" role="progressbar" aria-label="Прогресс до следующей проверки" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="progressWrap"><div id="cycleProgress" class="cycle-progress"></div></div><div class="cycle-label"><span id="cycleHint">Новый запрос выполняется автоматически</span><span>30 с</span></div></section>
+            <section class="panel section" id="analytics" aria-labelledby="analyticsTitle"><div class="section-head"><div><h2 class="section-title" id="analyticsTitle">Время выполнения запросов</h2><p class="section-note">Последние 30 проверок GitHub Actions · реальные HTTP-ответы</p></div><span class="small-tag">GITHUB DATA</span></div><div class="chart-wrap"><svg id="trendChart" role="img" aria-label="График времени выполнения запросов" viewBox="0 0 650 215" preserveAspectRatio="none"></svg><div class="chart-empty" id="chartEmpty"><svg class="icon"><use href="#i-chart"/></svg><strong>Собираем статистику</strong><span>График появится после первых запросов</span></div></div><div class="chart-footer"><span class="legend"><i></i>Время запроса, мс</span><span id="chartCaption">Нет данных</span></div></section>
+            <section class="panel section" aria-labelledby="cycleTitle"><div class="section-head"><div><h2 class="section-title" id="cycleTitle">Цикл мониторинга</h2><p class="section-note">Браузер каждые 30 секунд · GitHub каждые 5 минут</p></div><span class="small-tag" id="cycleBadge">АКТИВЕН</span></div><div class="details"><div class="detail"><span class="key">Следующий запрос</span><span class="value" id="countdown">—</span></div><div class="detail"><span class="key">Последний результат</span><span class="value" id="lastResult">—</span></div><div class="detail"><span class="key">Длительность</span><span class="value" id="lastDuration">—</span></div><div class="detail"><span class="key">Точка проверки</span><span class="value" id="serverHost">—</span></div></div><div class="cycle-track" role="progressbar" aria-label="Прогресс до следующей проверки" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="progressWrap"><div id="cycleProgress" class="cycle-progress"></div></div><div class="cycle-label"><span id="cycleHint">Новый запрос выполняется автоматически</span><span>30 с</span></div><p class="helper">Запросов браузера: <strong id="browserAttempts">0</strong> · <span id="browserState">Ожидаем</span></p></section>
           </div>
           <div class="bottom-grid">
-            <section class="panel section" id="events" aria-labelledby="eventsTitle"><div class="section-head"><div><h2 class="section-title" id="eventsTitle">Последние события</h2><p class="section-note">История автоматически сохраняется в браузере</p></div><button class="btn btn-muted" type="button" id="exportBtn" title="Скачать журнал CSV"><svg class="icon"><use href="#i-download"/></svg> CSV</button></div><ul class="log-list" id="eventList"><li class="log-empty">Событий пока нет</li></ul></section>
-            <section class="panel section" id="settings" aria-labelledby="settingsTitle"><div class="section-head"><div><h2 class="section-title" id="settingsTitle">Настройки сервера</h2><p class="section-note">Адрес хранится только в твоём браузере</p></div><span class="small-tag">CONFIG</span></div>
-              <form id="serverForm"><label for="serverUrl" class="form-label">HTTPS-адрес Render или публичного /health</label><div class="field"><svg class="icon"><use href="#i-link"/></svg><input id="serverUrl" name="serverUrl" type="url" placeholder="https://clubium-render.onrender.com/" required autocomplete="url" spellcheck="false" inputmode="url"></div><div class="config-actions"><button class="btn btn-primary" type="submit">Сохранить URL</button><button class="btn btn-muted" type="button" id="copyBtn"><svg class="icon"><use href="#i-copy"/></svg> Копировать</button><button class="btn btn-muted" type="button" id="clearBtn" title="Очистить журнал и статистику"><svg class="icon"><use href="#i-trash"/></svg></button></div><p class="config-message" id="configMessage" role="status"></p></form>
-              <p class="helper">Используется обычный <strong>GET-запрос</strong> без авторизации, cookies и данных учащихся. Если у тебя есть публичный маршрут <code>/health</code>, его лучше использовать вместо главной страницы.</p>
+            <section class="panel section" id="events" aria-labelledby="eventsTitle"><div class="section-head"><div><h2 class="section-title" id="eventsTitle">Последние события</h2><p class="section-note">Проверки хранятся в GitHub, доступны на других устройствах</p></div><button class="btn btn-muted" type="button" id="exportBtn" title="Скачать журнал CSV"><svg class="icon"><use href="#i-download"/></svg> CSV</button></div><ul class="log-list" id="eventList"><li class="log-empty">Событий пока нет</li></ul></section>
+            <section class="panel section" id="settings" aria-labelledby="settingsTitle"><div class="section-head"><div><h2 class="section-title" id="settingsTitle">Настройки сервера</h2><p class="section-note">Общие настройки хранятся в monitor/config.json</p></div><span class="small-tag">CONFIG</span></div>
+              <form id="serverForm"><label for="serverUrl" class="form-label">Публичный адрес Render (из GitHub config.json)</label><div class="field"><svg class="icon"><use href="#i-link"/></svg><input id="serverUrl" name="serverUrl" type="url" placeholder="https://clubium-render.onrender.com/" required readonly aria-readonly="true" autocomplete="url" spellcheck="false" inputmode="url"></div><div class="config-actions"><button class="btn btn-primary" type="submit">Обновить статус</button><button class="btn btn-muted" type="button" id="copyBtn"><svg class="icon"><use href="#i-copy"/></svg> Копировать</button><button class="btn btn-muted" type="button" id="clearBtn" title="Очистить только локальные события (история GitHub сохранится)"><svg class="icon"><use href="#i-trash"/></svg></button></div><p class="config-message" id="configMessage" role="status"></p></form>
+              <p class="helper">Адрес для всех устройств меняется в <code>monitor/config.json</code> на GitHub. На HTML-сайте нельзя безопасно записывать изменения напрямую в репозиторий без отдельной авторизации. Используется только публичный GET — данные учащихся не передаются.</p>
             </section>
           </div>
-          <aside class="panel notice" aria-label="Ограничения мониторинга"><span class="notice-icon"><svg class="icon"><use href="#i-info"/></svg></span><div><strong>Важные особенности</strong><p><b>*</b> Запросы выполняются в режиме <code>no-cors</code>: браузер может показать сетевой ответ, но <strong>не может проверить HTTP-статус или содержимое ответа</strong>. Это не подтверждение работоспособности приложения. На GitHub Pages запросы идут <strong>только пока вкладка открыта и браузер не приостановил её</strong>. Для круглосуточной проверки потребуется внешний планировщик. Регулярные запросы не гарантируют, что бесплатный Render не будет перезапущен или ограничен.</p></div></aside>
+          <aside class="panel notice" aria-label="Статус автоматизации"><span class="notice-icon"><svg class="icon"><use href="#i-shield"/></svg></span><div><strong>Подтверждённый мониторинг через GitHub Actions</strong><p>Вместо режима <code>no-cors</code> сервер GitHub сам проверяет HTTP-код и сохраняет результат в репозитории. <b id="syncState">Проверяем связь с GitHub...</b> Облачная проверка работает без открытого браузера после настройки Actions и Pages. Браузерные запросы каждые 30 секунд выполняются только при открытой вкладке, а без CORS браузер не может прочитать их HTTP-статус. Сервис Render всё равно может перезапуститься или достичь лимитов Free.</p></div></aside>
         </main>
-        <footer class="footer"><span>© ÜiirmeHub Pulse · Частный мониторинг без сторонней аналитики</span><span><a href="https://render.com/docs/free" target="_blank" rel="noopener noreferrer">Правила Render Free</a> · <a href="https://docs.github.com/en/pages" target="_blank" rel="noopener noreferrer">GitHub Pages</a></span></footer>
+        <footer class="footer"><span>© ÜiirmeHub Pulse · Публичные HTTP-статусы без личных данных</span><span><a href="https://render.com/docs/free" target="_blank" rel="noopener noreferrer">Правила Render Free</a> · <a href="https://docs.github.com/en/pages" target="_blank" rel="noopener noreferrer">GitHub Pages</a></span></footer>
       </div>
     </div>
   </div>
   <div class="toast" id="toast" role="status" aria-live="polite"><svg class="icon"><use href="#i-check"/></svg><span id="toastText">Готово</span></div>
   <script>
-  (() => {
-    'use strict';
-    const INTERVAL = 30_000;
-    const TIMEOUT = 20_000;
-    const DEFAULT_URL = 'https://clubium-render.onrender.com/';
-    const K_URL = 'uiirmehub-pulse-url-v2';
-    const K_DATA = 'uiirmehub-pulse-history-v2';
-    const K_THEME = 'uiirmehub-pulse-theme-v2';
-    const $ = id => document.getElementById(id);
-    const fmtTime = d => new Date(d).toLocaleTimeString('ru-RU', {hour:'2-digit',minute:'2-digit',second:'2-digit'});
-    const fmtInt = n => n.toLocaleString('ru-RU');
-    const safeRead = (key, fallback) => { try { return localStorage.getItem(key) ?? fallback; } catch { return fallback; } };
-    const safeWrite = (key, value) => { try { localStorage.setItem(key, value); } catch {} };
-    const icon = name => `<svg class="icon"><use href="#i-${name}"/></svg>`;
-    const E = (tag, cls, text) => { const el = document.createElement(tag); if (cls) el.className = cls; if (text !== undefined) el.textContent = text; return el; };
-    function parseURL(str) {
-      const u = new URL(str.trim());
-      if (u.protocol !== 'https:' || u.username || u.password || u.search || u.hash) throw new Error('Нужен HTTPS-адрес без пароля, параметров и #якоря.');
-      return u.href;
+(() => {
+  'use strict';
+  const INTERVAL = 30_000;
+  const TIMEOUT = 18_000;
+  const STALE_AFTER = 18 * 60_000;
+  const DEFAULT_URL = 'https://clubium-render.onrender.com/';
+  const K_THEME = 'uiirmehub-pulse-theme-v3';
+  const K_ACTIVE = 'uiirmehub-pulse-browser-active-v3';
+  const $ = id => document.getElementById(id);
+  const E = (tag, cls, value) => { const el=document.createElement(tag); if(cls) el.className=cls; if(value!==undefined) el.textContent=value; return el; };
+  const fmtTime = date => new Date(date).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  const fmtInt = n => Number(n || 0).toLocaleString('ru-RU');
+  const safeGet = (k,fallback) => {try{return localStorage.getItem(k)??fallback;}catch{return fallback;}};
+  const safeSet = (k,v) => {try{localStorage.setItem(k,v);}catch{}};
+  const icon = name=>`<svg class="icon"><use href="#i-${name}"/></svg>`;
+  const $ping = $('pingBtn'), $toggle = $('toggleBtn');
+  let url=DEFAULT_URL, active=safeGet(K_ACTIVE,'true')!=='false', busy=false, nextAt=Date.now()+INTERVAL;
+  let timerId=0, toastTimer=0, cloud=null, browserAttempts=0, browserReadable=false, browserFailed=false;
+  let localEvents=[];
+
+  document.documentElement.dataset.theme=safeGet(K_THEME,'dark')==='light'?'light':'dark';
+  function updateThemeIcon(){ $('themeIcon').querySelector('use').setAttribute('href',document.documentElement.dataset.theme==='dark'?'#i-sun':'#i-moon'); }
+  updateThemeIcon();
+  $('themeBtn').addEventListener('click',()=>{document.documentElement.dataset.theme=document.documentElement.dataset.theme==='dark'?'light':'dark';safeSet(K_THEME,document.documentElement.dataset.theme);updateThemeIcon();});
+  function toast(message){$('toastText').textContent=message;$('toast').classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').classList.remove('show'),2800);}
+  function addLocalEvent(title,desc,type='neutral'){
+    localEvents.unshift({title,desc,type,time:Date.now()});localEvents=localEvents.slice(0,12);renderEvents();
+  }
+  function cloudCheckedTime(){return Number.isFinite(Date.parse(cloud?.checked_at))?Date.parse(cloud.checked_at):null;}
+  function isCloudFresh(){const t=cloudCheckedTime();return t!==null && Math.abs(Date.now()-t)<STALE_AFTER;}
+  function cloudHistory(){return Array.isArray(cloud?.history)?cloud.history.filter(x=>x&&['up','down'].includes(x.status)&&Number.isFinite(x.duration_ms)&&Number.isFinite(Date.parse(x.checked_at))):[];}
+
+  function syncURL(){ $('serverUrl').value=url;$('serverHost').textContent=new URL(url).host;$('sideServerLink').href=url; }
+  async function loadConfig(){
+    try{
+      const res=await fetch('./config.json?v='+Date.now(),{cache:'no-store'});
+      if(!res.ok)throw Error('HTTP '+res.status);
+      const config=await res.json();
+      const parsed=new URL(config.target_url);
+      if(parsed.protocol==='https:' && !parsed.username && !parsed.password)url=parsed.href;
+    }catch(e){ $('configMessage').textContent='Используется встроенный адрес; config.json пока не опубликован.'; }
+    syncURL();
+  }
+  function setCloudView(){
+    const orb=$('statusOrb'), side=$('sideDot'), top=$('headerDot');
+    orb.className='status-orb';side.className='mini-dot';top.className='mini-dot';
+    const fresh=isCloudFresh(), date=cloudCheckedTime();
+    if(!date){
+      $('heroStateText').textContent='Ожидаем GitHub Actions';
+      $('heroDescription').textContent='Запусти workflow в GitHub → Actions → ÜiirmeHub Pulse → Run workflow. Проверка HTTP выполняется на сервере GitHub.';
+      $('headerState').textContent='Нет облачной проверки';$('sideState').textContent='Первая проверка ещё не опубликована';
+      side.classList.add('wait');top.classList.add('wait');
+    }else if(!fresh){
+      $('heroStateText').textContent='Данные устарели';
+      $('heroDescription').textContent='Последняя проверка: '+new Date(date).toLocaleString('ru-RU')+'. GitHub Actions мог задержаться или остановиться. Состояние сервера сейчас неизвестно.';
+      $('headerState').textContent='Нет свежих данных';$('sideState').textContent='Облачные проверки давно не обновлялись';
+      orb.classList.add('is-off');side.classList.add('wait');top.classList.add('wait');
+    }else if(cloud.status==='up'){
+      $('heroStateText').textContent='Сервер отвечает';
+      $('heroDescription').textContent='Проверено из GitHub Actions: HTTP '+cloud.http_status+' · '+cloud.duration_ms+' мс. Это проверка доступности URL, а не всей базы данных или функций приложения.';
+      $('headerState').textContent='HTTP '+cloud.http_status+' · проверено в GitHub';$('sideState').textContent='Последняя облачная проверка успешна';
+      orb.classList.add('is-good');
+    }else{
+      $('heroStateText').textContent='Сервер не отвечает';
+      $('heroDescription').textContent='GitHub Actions: '+(cloud.error||('HTTP '+cloud.http_status))+'. Следующая проверка — по расписанию GitHub.';
+      $('headerState').textContent='Ошибка облачной проверки';$('sideState').textContent='Есть подтверждённая ошибка последней проверки';
+      orb.classList.add('is-bad');side.classList.add('wait');top.classList.add('wait');
     }
-    let url = DEFAULT_URL;
-    try { url = parseURL(safeRead(K_URL, DEFAULT_URL)); } catch {}
-    let stored;
-    try { stored = JSON.parse(safeRead(K_DATA, 'null')); } catch { stored = null; }
-    const data = {
-      total: Number.isSafeInteger(stored?.total) && stored.total >= 0 ? stored.total : 0,
-      success: Number.isSafeInteger(stored?.success) && stored.success >= 0 ? stored.success : 0,
-      error: Number.isSafeInteger(stored?.error) && stored.error >= 0 ? stored.error : 0,
-      history: Array.isArray(stored?.history) ? stored.history.filter(x => Number.isFinite(x?.duration) && Number.isFinite(x?.time) && ['ok','fail'].includes(x.status)).slice(-120) : [],
-      events: Array.isArray(stored?.events) ? stored.events.filter(x => typeof x?.title === 'string' && Number.isFinite(x?.time) && typeof x?.desc === 'string' && ['ok','fail','neutral'].includes(x.type)).slice(0,80) : []
-    };
-    let active = true, inFlight = false, nextAt = 0, timerId = 0, latest = null, toastTimer = 0;
-    const $toggle = $('toggleBtn'), $ping = $('pingBtn');
-    $('serverUrl').value = url;
-    $('serverHost').textContent = new URL(url).host;
-    $('sideServerLink').href = url;
-    const theme = safeRead(K_THEME, 'dark') === 'light' ? 'light' : 'dark';
-    document.documentElement.dataset.theme = theme;
-    function renderTheme() { $('themeIcon').querySelector('use').setAttribute('href', document.documentElement.dataset.theme === 'dark' ? '#i-sun' : '#i-moon'); }
-    renderTheme();
-    $('themeBtn').addEventListener('click', () => { const newTheme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'; document.documentElement.dataset.theme = newTheme; safeWrite(K_THEME, newTheme); renderTheme(); });
-    function persist() { safeWrite(K_DATA, JSON.stringify(data)); }
-    function toast(message) { $('toastText').textContent = message; $('toast').classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => $('toast').classList.remove('show'), 3100); }
-    function addEvent(title, desc, type='neutral') {
-      data.events.unshift({title,desc,type,time:Date.now()}); data.events = data.events.slice(0,80);
-      persist(); renderEvents();
-    }
-    function renderEvents() {
-      const list = $('eventList'); list.replaceChildren();
-      if (!data.events.length) { list.append(E('li','log-empty','Событий пока нет')); return; }
-      for (const event of data.events.slice(0,9)) {
-        const li = E('li','log-entry');
-        const badge = E('span','event-icon' + (event.type === 'ok' ? ' good' : event.type === 'fail' ? ' bad' : ''));
-        badge.innerHTML = icon(event.type === 'ok' ? 'check' : event.type === 'fail' ? 'alert' : 'history');
-        const contents = E('div'); contents.append(E('div','event-title',event.title),E('div','event-desc',event.desc));
-        li.append(badge,contents,E('time','event-time',fmtTime(event.time))); list.append(li);
-      }
-    }
-    function renderMetrics() {
-      $('totalCount').textContent = fmtInt(data.total);
-      $('replyCount').textContent = fmtInt(data.success);
-      $('errorCount').textContent = fmtInt(data.error);
-      const last = data.history.at(-1);
-      $('lastCheck').textContent = last ? fmtTime(last.time) : '—';
-      $('lastResult').textContent = last ? last.status === 'ok' ? 'Ответ сети*' : 'Ошибка' : '—';
-      $('lastResult').style.color = last ? (last.status === 'ok' ? 'var(--good)' : 'var(--bad)') : 'var(--text)';
-      $('lastDuration').textContent = last ? Math.round(last.duration) + ' мс' : '—';
-    }
-    const NS='http://www.w3.org/2000/svg';
-    function svg(tag, attrs={}) { const el=document.createElementNS(NS,tag); for (const [k,v] of Object.entries(attrs)) el.setAttribute(k,String(v)); return el; }
-    function renderChart() {
-      const chart=$('trendChart'); chart.replaceChildren();
-      const pts=data.history.slice(-30); $('chartEmpty').hidden = pts.length>0;
-      // display:none needed because chart-empty has flex display
-      $('chartEmpty').style.display=pts.length ? 'none' : 'flex';
-      if (!pts.length) { $('chartCaption').textContent='Нет данных'; return; }
-      const left=28,right=634,top=17,bottom=190;
-      const max=Math.max(250,...pts.map(p => p.duration));
-      const ceiling=Math.ceil(max/250)*250;
-      const defs=svg('defs'); const grad=svg('linearGradient',{id:'pulseFill',x1:0,y1:0,x2:0,y2:1}); grad.append(svg('stop',{offset:'0%','stop-color':'#8a7aff','stop-opacity':'.29'}),svg('stop',{offset:'100%','stop-color':'#8a7aff','stop-opacity':'0'})); defs.append(grad); chart.append(defs);
-      for(let i=0;i<=4;i++) {
-        const y=top+(bottom-top)*i/4;
-        chart.append(svg('line',{x1:left,y1:y,x2:right,y2:y,stroke:'var(--line2)','stroke-dasharray':'3 5','stroke-width':'1'}));
-        const label=svg('text',{x:left-7,y:y+4,fill:'var(--soft)','font-size':10,'text-anchor':'end'}); label.textContent=String(Math.round(ceiling*(1-i/4))); chart.append(label);
-      }
-      const xy=pts.map((p,i)=>[left+(right-left)*(pts.length===1 ? .5 : i/(pts.length-1)), bottom-(p.duration/ceiling)*(bottom-top)]);
-      const d=xy.map(([x,y],i)=>(i?'L':'M')+x.toFixed(2)+' '+y.toFixed(2)).join(' ');
-      chart.append(svg('path',{d:d+` L ${xy.at(-1)[0]} ${bottom} L ${xy[0][0]} ${bottom} Z`,fill:'url(#pulseFill)'}));
-      chart.append(svg('path',{d,stroke:'#887dff','stroke-width':3,fill:'none','stroke-linecap':'round','stroke-linejoin':'round'}));
-      const [x,y]=xy.at(-1);
-      chart.append(svg('circle',{cx:x,cy:y,r:6,fill:'#887dff','fill-opacity':'.20'}));
-      chart.append(svg('circle',{cx:x,cy:y,r:3.4,fill:'#8e80ff',stroke:'var(--card)','stroke-width':1}));
-      const firstLabel=svg('text',{x:left,y:209,fill:'var(--soft)','font-size':10}); firstLabel.textContent=fmtTime(pts[0].time); chart.append(firstLabel);
-      const lastLabel=svg('text',{x:right,y:209,fill:'var(--soft)','font-size':10,'text-anchor':'end'}); lastLabel.textContent=fmtTime(pts.at(-1).time); chart.append(lastLabel);
-      $('chartCaption').textContent='Показано: '+pts.length+' из '+data.history.length;
-    }
-    function setState(state) {
-      const orb=$('statusOrb'); orb.className='status-orb';
-      const small=$('sideDot'); small.className='mini-dot';
-      $('headerDot').className='mini-dot';
-      if(state==='paused') {
-        $('heroStateText').textContent='Монитор на паузе';
-        $('heroDescription').textContent='Периодические запросы остановлены. Можно запустить их снова.';
-        orb.classList.add('is-off'); small.classList.add('off'); $('headerDot').classList.add('off');
-        $('headerState').textContent='Монитор остановлен'; $('sideState').textContent='Автоматические запросы приостановлены';
-      } else if(state==='checking') {
-        $('heroStateText').textContent='Проверяем соединение';
-        $('heroDescription').textContent='Отправляется GET-запрос без cookies, авторизации и данных учащихся.';
-        $('headerState').textContent='Выполняется запрос'; $('sideState').textContent='Идёт проверка подключения к серверу';
-        orb.classList.add('is-good');
-      } else if(state==='ok') {
-        $('heroStateText').textContent='Ответ сети получен*';
-        $('heroDescription').textContent='Сетевой запрос завершился. HTTP-статус скрыт режимом no-cors — состояние приложения не подтверждено.';
-        $('headerState').textContent='Проверки запущены'; $('sideState').textContent='Запрос каждые 30 секунд · HTTP-статус скрыт';
-        orb.classList.add('is-good');
-      } else if(state==='fail') {
-        $('heroStateText').textContent='Ошибка соединения';
-        $('heroDescription').textContent='Последний запрос завершился ошибкой или тайм-аутом. Следующая проверка пройдёт по расписанию.';
-        $('headerState').textContent='Ошибка последней попытки'; $('sideState').textContent='Есть ошибка сети; повторы продолжаются';
-        small.classList.add('wait'); $('headerDot').classList.add('wait'); orb.classList.add('is-bad');
-      }
-      if (!active) {
-        $('cycleBadge').textContent='ПАУЗА';
-        $toggle.querySelector('span').textContent='Запустить';
-        $toggle.querySelector('use').setAttribute('href','#i-play');
-      } else {
-        $('cycleBadge').textContent='АКТИВЕН';
-        $toggle.querySelector('span').textContent='Остановить';
-        $toggle.querySelector('use').setAttribute('href','#i-pause');
-      }
-    }
-    function countdown() {
-      if(!active) {
-        $('countdown').textContent='Пауза'; $('cycleProgress').style.width='0%'; $('progressWrap').setAttribute('aria-valuenow','0'); $('cycleHint').textContent='Автоматические проверки отключены'; return;
-      }
-      const remaining=Math.max(0,nextAt-Date.now());
-      const percentage=Math.max(0,Math.min(100,100*(1-remaining/INTERVAL)));
-      $('countdown').textContent=Math.ceil(remaining/1000)+' сек';
-      $('cycleProgress').style.width=percentage.toFixed(1)+'%';
-      $('progressWrap').setAttribute('aria-valuenow',String(Math.round(percentage)));
-      $('cycleHint').textContent=inFlight?'Запрос выполняется...':'Новый запрос по расписанию';
-    }
-    async function ping(origin='manual') {
-      if(inFlight) { if(origin==='manual') toast('Предыдущий запрос ещё выполняется'); return; }
-      inFlight=true; $ping.disabled=true;
-      if(active) setState('checking');
-      data.total += 1; renderMetrics(); persist();
-      const started=performance.now(); const controller=new AbortController(); const to=setTimeout(()=>controller.abort(),TIMEOUT);
-      let state='ok', message='Сетевой ответ получен*';
-      try {
-        // Opaque response: do not claim HTTP 200, uptime, app health, or reliable server availability.
-        await fetch(url,{method:'GET',mode:'no-cors',credentials:'omit',redirect:'follow',cache:'no-store',signal:controller.signal});
-        data.success++;
-      } catch(e) {
-        data.error++; state='fail'; message=e?.name==='AbortError'?'Тайм-аут 20 сек':'Ошибка сети / блокировка';
-      } finally { clearTimeout(to); }
-      const duration=Math.round(performance.now()-started);
-      data.history.push({time:Date.now(),duration,status:state}); data.history=data.history.slice(-120);
-      addEvent(state==='ok'?'Запрос завершён*':'Не удалось выполнить запрос',message+' · '+duration+' мс · '+(origin==='auto'?'автоматически':'вручную'),state==='ok'?'ok':'fail');
-      latest=state; inFlight=false; $ping.disabled=false;
-      if(active) setState(state); else setState('paused');
-      renderMetrics();renderChart();countdown();persist();
-    }
-    function schedule() {
-      clearTimeout(timerId); if(!active)return;
-      nextAt=Date.now()+INTERVAL; countdown();
-      timerId=setTimeout(()=>{ if(!active)return; schedule(); ping('auto'); },INTERVAL);
-    }
-    function start() {
-      active=true; schedule(); setState('checking'); addEvent('Монитор запущен','Автоматические запросы раз в 30 секунд'); ping('auto');
-    }
-    function pause() {
-      active=false;clearTimeout(timerId);nextAt=0;setState('paused');countdown();addEvent('Монитор приостановлен','Автоматическая отправка запросов остановлена');
-    }
-    $toggle.addEventListener('click',()=>active?pause():start());
-    $ping.addEventListener('click',()=>ping('manual'));
-    $('serverForm').addEventListener('submit',e=>{
-      e.preventDefault();
-      try {
-        url=parseURL($('serverUrl').value);
-        safeWrite(K_URL,url);
-        $('serverUrl').value=url;
-        $('serverHost').textContent=new URL(url).host;
-        $('sideServerLink').href=url;
-        $('configMessage').style.color='var(--good)'; $('configMessage').textContent='Адрес сохранён. Новые запросы отправляются на него.';
-        addEvent('Адрес сервера обновлён',new URL(url).host);
-        toast('Новый адрес сервера сохранён');
-        if(active)ping('manual');
-      } catch(e) { $('configMessage').style.color='var(--bad)'; $('configMessage').textContent=e.message||'Введите корректный HTTPS-адрес'; }
+    $('cloudFresh').textContent=date?'GitHub: '+fmtTime(date)+(fresh?' · актуально':' · устарело'):'GitHub: нет проверки';
+  }
+  function renderMetrics(){
+    $('totalCount').textContent=fmtInt(cloud?.counts?.total);
+    $('replyCount').textContent=fmtInt(cloud?.counts?.success);
+    $('errorCount').textContent=fmtInt(cloud?.counts?.error);
+    const t=cloudCheckedTime();
+    $('lastCheck').textContent=t?fmtTime(t):'—';
+    $('lastResult').textContent=t?(cloud.status==='up'?'HTTP '+cloud.http_status:cloud.http_status?'HTTP '+cloud.http_status:'Нет ответа'):'—';
+    $('lastResult').style.color=t?(cloud.status==='up'?'var(--good)':'var(--bad)'):'var(--text)';
+    $('lastDuration').textContent=t&&Number.isFinite(cloud.duration_ms)?cloud.duration_ms+' мс':'—';
+    $('browserAttempts').textContent=String(browserAttempts);
+  }
+  function renderEvents(){
+    const list=$('eventList');list.replaceChildren();
+    const remote=cloudHistory().slice(-8).reverse().map(x=>({
+      title:x.status==='up'?'HTTP '+x.http_status+' · проверка GitHub':(x.http_status?'Ошибка HTTP '+x.http_status:'Нет ответа · проверка GitHub'),
+      desc:(x.error||'Сервер доступен')+' · '+x.duration_ms+' мс',
+      time:Date.parse(x.checked_at),type:x.status==='up'?'ok':'fail'
+    }));
+    const items=[...remote,...localEvents].sort((a,b)=>b.time-a.time).slice(0,9);
+    if(!items.length){list.append(E('li','log-empty','Ожидаем первую проверку GitHub'));return;}
+    items.forEach(event=>{
+      const li=E('li','log-entry');const badge=E('span','event-icon'+(event.type==='ok'?' good':event.type==='fail'?' bad':''));
+      badge.innerHTML=icon(event.type==='ok'?'check':event.type==='fail'?'alert':'history');
+      const div=E('div');div.append(E('div','event-title',event.title),E('div','event-desc',event.desc));
+      li.append(badge,div,E('time','event-time',fmtTime(event.time)));list.append(li);
     });
-    $('copyBtn').addEventListener('click',async()=>{
-      try{ await navigator.clipboard.writeText(url);toast('Адрес скопирован'); }
-      catch { toast('Не удалось скопировать. Выделите адрес в поле.');$('serverUrl').focus();$('serverUrl').select(); }
-    });
-    $('clearBtn').addEventListener('click',()=>{
-      if(!window.confirm('Очистить статистику и весь журнал событий в этом браузере?'))return;
-      data.total=0;data.success=0;data.error=0;data.history=[];data.events=[];persist();renderMetrics();renderChart();renderEvents();toast('История очищена');
-    });
-    $('exportBtn').addEventListener('click',()=>{
-      if(!data.history.length){toast('Пока нет запросов для экспорта');return;}
-      const rows=[['Время','Состояние','Длительность (мс)'],...data.history.map(x=>[new Date(x.time).toISOString(),x.status==='ok'?'Сетевой ответ (HTTP не проверен)':'Ошибка',x.duration])];
-      const csv='\ufeff'+rows.map(row=>row.map(value=>'"'+String(value).replaceAll('"','""')+'"').join(';')).join('\r\n');
-      const blob=new Blob([csv],{type:'text/csv;charset=utf-8'}); const objectURL=URL.createObjectURL(blob);
-      const a=E('a');a.href=objectURL;a.download='uiirmehub-pulse-'+new Date().toISOString().slice(0,10)+'.csv';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(objectURL),1000);toast('Журнал экспортирован в CSV');
-    });
-    const dateClock=()=>{const now=new Date();$('currentDate').textContent=now.toLocaleDateString('ru-RU',{day:'numeric',month:'long',year:'numeric'});$('currentClock').textContent=fmtTime(now);countdown();};
-    setInterval(dateClock,500);
-    document.addEventListener('visibilitychange',()=>{
-      if(document.hidden || !active)return;
-      // Tabs can be throttled: one catch-up request, never a burst of missed requests.
-      if(Date.now()>=nextAt+1200){schedule();addEvent('Вкладка снова активна','Расписание восстановлено после фоновой паузы');ping('auto');}
-    });
-    document.querySelectorAll('.nav a[href^="#"]').forEach(a=>a.addEventListener('click',()=>{document.querySelectorAll('.nav a').forEach(item=>item.classList.remove('active'));a.classList.add('active');}));
-    renderMetrics(); renderEvents();renderChart();dateClock();start();
-  })();
+  }
+  const NS='http://www.w3.org/2000/svg';
+  function svg(tag,attrs={}){const el=document.createElementNS(NS,tag);Object.entries(attrs).forEach(([k,v])=>el.setAttribute(k,String(v)));return el;}
+  function renderChart(){
+    const chart=$('trendChart');chart.replaceChildren();
+    const pts=cloudHistory().slice(-30);$('chartEmpty').style.display=pts.length?'none':'flex';
+    if(!pts.length){$('chartCaption').textContent='Нет облачных данных';return;}
+    const left=31,right=634,top=17,bottom=190,ceiling=Math.ceil(Math.max(250,...pts.map(p=>p.duration_ms))/250)*250;
+    const defs=svg('defs'),grad=svg('linearGradient',{id:'pulseFill',x1:0,y1:0,x2:0,y2:1});
+    grad.append(svg('stop',{offset:'0%','stop-color':'#8a7aff','stop-opacity':'.29'}),svg('stop',{offset:'100%','stop-color':'#8a7aff','stop-opacity':'0'}));defs.append(grad);chart.append(defs);
+    for(let i=0;i<=4;i++){
+      const y=top+(bottom-top)*i/4;
+      chart.append(svg('line',{x1:left,y1:y,x2:right,y2:y,stroke:'var(--line2)','stroke-dasharray':'3 5','stroke-width':'1'}));
+      const label=svg('text',{x:left-7,y:y+4,fill:'var(--soft)','font-size':10,'text-anchor':'end'});label.textContent=String(Math.round(ceiling*(1-i/4)));chart.append(label);
+    }
+    const xy=pts.map((p,i)=>[left+(right-left)*(pts.length===1?.5:i/(pts.length-1)),bottom-(p.duration_ms/ceiling)*(bottom-top)]);
+    const line=xy.map(([x,y],i)=>(i?'L':'M')+x.toFixed(2)+' '+y.toFixed(2)).join(' ');
+    chart.append(svg('path',{d:line+` L ${xy.at(-1)[0]} ${bottom} L ${xy[0][0]} ${bottom} Z`,fill:'url(#pulseFill)'}));
+    chart.append(svg('path',{d:line,stroke:'#887dff','stroke-width':3,fill:'none','stroke-linecap':'round','stroke-linejoin':'round'}));
+    const [x,y]=xy.at(-1);chart.append(svg('circle',{cx:x,cy:y,r:4,fill:'#8e80ff',stroke:'var(--card)','stroke-width':1}));
+    const start=svg('text',{x:left,y:209,fill:'var(--soft)','font-size':10});start.textContent=fmtTime(pts[0].checked_at);chart.append(start);
+    const end=svg('text',{x:right,y:209,fill:'var(--soft)','font-size':10,'text-anchor':'end'});end.textContent=fmtTime(pts.at(-1).checked_at);chart.append(end);
+    $('chartCaption').textContent='Показано '+pts.length+' из '+cloudHistory().length+' проверок GitHub';
+  }
+  async function loadRemoteStatus(){
+    try{
+      const response=await fetch('./data/status.json?t='+Date.now(),{cache:'no-store'});
+      if(!response.ok)throw new Error('HTTP '+response.status);
+      const result=await response.json();
+      if(result.schema_version!==1||!Array.isArray(result.history))throw new Error('Неверный формат');
+      if(cloud?.checked_at!==result.checked_at){cloud=result;renderEvents();renderChart();}
+      cloud=result;
+      $('syncState').textContent='Синхронизировано с GitHub';
+    }catch(e){
+      $('syncState').textContent='Нет доступа к status.json';
+      if(!cloud){$('configMessage').textContent='Облачные данные появятся после первой публикации GitHub Actions.';}
+    }
+    setCloudView();renderMetrics();
+  }
+  async function ping(origin='manual'){
+    if(busy)return;
+    busy=true;$ping.disabled=true;browserAttempts++;renderMetrics();
+    const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),TIMEOUT);
+    let result='unknown';
+    try{
+      // CORS is intentional: a readable response proves the actual HTTP status.
+      // If cross-origin response headers are absent, the request may still reach Render,
+      // but the browser cannot reliably distinguish a CORS rejection from network failure.
+      const response=await fetch(url,{method:'GET',mode:'cors',credentials:'omit',cache:'no-store',redirect:'follow',signal:controller.signal});
+      browserReadable=true;browserFailed=!response.ok;result=response.ok?'ok':'fail';
+      addLocalEvent('Проверка браузера · HTTP '+response.status,'Ответ доступен благодаря CORS',result);
+      $('browserState').textContent='HTTP '+response.status+' · CORS разрешён';
+    }catch(e){
+      browserReadable=false;browserFailed=true;
+      $('browserState').textContent=e.name==='AbortError'?'Тайм-аут браузера':'HTTP недоступен браузеру (CORS или сеть)';
+      if(origin==='manual')addLocalEvent('Запрос браузера','HTTP-ответ не удалось прочитать; смотри подтверждённый статус GitHub','neutral');
+    }finally{clearTimeout(timeout);busy=false;$ping.disabled=false;}
+    await loadRemoteStatus();
+    return result;
+  }
+  function setActiveButtons(){
+    $('cycleBadge').textContent=active?'BROWSER ON':'ПАУЗА';
+    $toggle.querySelector('span').textContent=active?'Остановить':'Запустить';
+    $toggle.querySelector('use').setAttribute('href',active?'#i-pause':'#i-play');
+  }
+  function countdown(){
+    if(!active){$('countdown').textContent='Пауза';$('cycleProgress').style.width='0%';$('progressWrap').setAttribute('aria-valuenow','0');$('cycleHint').textContent='Облачные проверки GitHub продолжаются';return;}
+    const remaining=Math.max(0,nextAt-Date.now());
+    $('countdown').textContent=Math.ceil(remaining/1000)+' сек';
+    const value=Math.round(100*(1-remaining/INTERVAL));$('cycleProgress').style.width=value+'%';$('progressWrap').setAttribute('aria-valuenow',String(value));
+    $('cycleHint').textContent=busy?'Браузер выполняет запрос':'Следующий браузерный запрос';
+  }
+  function schedule(){clearTimeout(timerId);if(!active)return;nextAt=Date.now()+INTERVAL;countdown();timerId=setTimeout(async()=>{
+      if(!active)return;
+      schedule(); // schedule independent of fetch duration; no overlapping calls.
+      await ping('auto');
+    },INTERVAL);
+  }
+  function start(){active=true;safeSet(K_ACTIVE,'true');setActiveButtons();schedule();ping('auto');}
+  function stop(){active=false;safeSet(K_ACTIVE,'false');clearTimeout(timerId);nextAt=0;setActiveButtons();countdown();}
+  $toggle.addEventListener('click',()=>{active?stop():start();toast(active?'Запросы браузера запущены':'Браузер остановлен; GitHub продолжает проверки');});
+  $ping.addEventListener('click',()=>ping('manual'));
+  $('serverForm').addEventListener('submit',e=>{e.preventDefault();loadRemoteStatus();toast('Обновляем данные из GitHub');});
+  $('copyBtn').addEventListener('click',async()=>{try{await navigator.clipboard.writeText(url);toast('Адрес скопирован');}catch{toast('Скопируй адрес из поля вручную');}});
+  $('clearBtn').addEventListener('click',()=>{localEvents=[];browserAttempts=0;renderEvents();renderMetrics();toast('Локальная история очищена. История GitHub сохранена.');});
+  $('exportBtn').addEventListener('click',()=>{
+    const rows=cloudHistory();if(!rows.length){toast('Облачная история пока не загружена');return;}
+    const cells=[['UTC','HTTP','Статус','Длительность (мс)','Ошибка'],...rows.map(x=>[x.checked_at,x.http_status??'',x.status,x.duration_ms,x.error??''])];
+    const text='\ufeff'+cells.map(r=>r.map(v=>'"'+String(v).replaceAll('"','""')+'"').join(';')).join('\r\n');
+    const blob=new Blob([text],{type:'text/csv;charset=utf-8'}),obj=URL.createObjectURL(blob),a=E('a');
+    a.href=obj;a.download='uiirmehub-github-history-'+new Date().toISOString().slice(0,10)+'.csv';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(obj),1200);
+    toast('История GitHub выгружена');
+  });
+  function tick(){const now=new Date();$('currentDate').textContent=now.toLocaleDateString('ru-RU',{day:'numeric',month:'long',year:'numeric'});$('currentClock').textContent=fmtTime(now);countdown();setCloudView();}
+  document.addEventListener('visibilitychange',()=>{
+    if(document.hidden)return;
+    loadRemoteStatus();
+    if(active && Date.now()>nextAt+1000){schedule();ping('auto');}
+  });
+  document.querySelectorAll('.nav a[href^="#"]').forEach(a=>a.addEventListener('click',()=>{document.querySelectorAll('.nav a').forEach(item=>item.classList.remove('active'));a.classList.add('active');}));
+  const startup=async()=>{
+    syncURL();setActiveButtons();renderMetrics();renderEvents();renderChart();
+    await loadConfig();await loadRemoteStatus();
+    if(active){schedule();ping('auto');}
+    setInterval(()=>{loadRemoteStatus();},INTERVAL);
+    setInterval(tick,1000);tick();
+  };
+  startup();
+})();
   </script>
 </body>
 </html>
