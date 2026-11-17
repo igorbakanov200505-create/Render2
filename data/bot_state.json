@@ -1,5 +1,5 @@
 {
-  "failure_streak": 1,
-  "alert_open": false,
+  "failure_streak": 2,
+  "alert_open": true,
   "update_offset": 638975615
 }
