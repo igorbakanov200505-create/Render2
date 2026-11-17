@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
-  "checked_at": "2026-11-16T16:09:08Z",
+  "checked_at": "2026-11-17T00:14:59Z",
   "status": "up",
   "http_status": 200,
-  "duration_ms": 318,
+  "duration_ms": 576,
   "error": null,
   "counts": {
-    "total": 35,
-    "success": 27,
+    "total": 36,
+    "success": 28,
     "error": 8
   },
   "history": [
@@ -254,6 +254,13 @@
       "status": "up",
       "http_status": 200,
       "duration_ms": 318,
+      "error": null
+    },
+    {
+      "checked_at": "2026-11-17T00:14:59Z",
+      "status": "up",
+      "http_status": 200,
+      "duration_ms": 576,
       "error": null
     }
   ]
