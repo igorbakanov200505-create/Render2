@@ -1,14 +1,14 @@
 {
   "schema_version": 1,
-  "checked_at": "2026-11-18T07:08:50Z",
+  "checked_at": "2026-11-18T16:28:05Z",
   "status": "down",
   "http_status": 503,
-  "duration_ms": 361,
+  "duration_ms": 204,
   "error": "HTTP 503",
   "counts": {
-    "total": 40,
+    "total": 41,
     "success": 28,
-    "error": 12
+    "error": 13
   },
   "history": [
     {
@@ -289,6 +289,13 @@
       "status": "down",
       "http_status": 503,
       "duration_ms": 361,
+      "error": "HTTP 503"
+    },
+    {
+      "checked_at": "2026-11-18T16:28:05Z",
+      "status": "down",
+      "http_status": 503,
+      "duration_ms": 204,
       "error": "HTTP 503"
     }
   ]
